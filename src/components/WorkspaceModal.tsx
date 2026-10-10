@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { TextInput } from "./controls/TextInput";
 
 export function WorkspaceModal({
   onClose,
@@ -41,12 +42,12 @@ export function WorkspaceModal({
           <span className="mb-2 block text-xs font-bold uppercase tracking-[0.1em] text-[#a0a8b8]">
             Workspace name
           </span>
-          <input
+          <TextInput
             autoFocus
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder="e.g. Client projects"
-            className="h-12 w-full rounded-xl border border-[#e5e8f0] px-4 text-sm outline-none focus:ring-2 focus:ring-[#5865e9]"
+            className="h-12 px-4 focus:ring-[#5865e9]"
           />
         </label>
         <div className="mt-6 flex justify-end gap-2">

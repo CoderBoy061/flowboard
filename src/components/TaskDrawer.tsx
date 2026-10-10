@@ -5,6 +5,9 @@ import { deleteTask, moveTask, updateTask } from "../redux/reducers/workspaceSli
 import type { Container, Task, TaskStatus, User } from "../types";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { FormField } from "./FormField";
+import { Select } from "./controls/Select";
+import { TextArea } from "./controls/TextArea";
+import { TextInput } from "./controls/TextInput";
 import { MAX_TASK_TITLE_LENGTH } from "../utils/taskValidation";
 
 export function TaskDrawer({
@@ -67,8 +70,6 @@ export function TaskDrawer({
       onError(error);
     }
   };
-  const inputClass =
-    "w-full rounded-xl border border-[#e6e9f0] bg-white px-3 py-2.5 text-sm text-[#566078] outline-none focus:ring-2 focus:ring-[#dfe3ff]";
   return (
     <div
       className="fixed inset-0 z-30 bg-[#172033]/20"
@@ -80,7 +81,7 @@ export function TaskDrawer({
             <span className="text-xs font-bold uppercase tracking-[0.15em] text-[#5865e9]">
               Task detail
             </span>
-            <input
+            <TextInput
               id="task-drawer-title"
               aria-label="Task title"
               value={draft.title}
@@ -93,7 +94,8 @@ export function TaskDrawer({
               onKeyDown={(event) => {
                 if (event.key === "Enter") event.currentTarget.blur();
               }}
-              className={`mt-2 w-full max-w-[350px] border-b bg-transparent pb-1 text-2xl font-bold leading-tight tracking-[-0.03em] text-[#20283a] outline-none transition focus:border-[#5865e9] ${titleError ? "border-[#d94d5d]" : "border-transparent"}`}
+              invalid={titleError}
+              className={`mt-2 max-w-[350px] border-b bg-transparent px-0 pb-1 text-2xl font-bold leading-tight tracking-[-0.03em] text-[#20283a] focus:border-[#5865e9] ${titleError ? "border-[#d94d5d]" : "border-transparent"}`}
             />
             {titleError && (
               <p className="mt-1 text-xs font-medium text-[#d94d5d]">
@@ -115,37 +117,35 @@ export function TaskDrawer({
             <label className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-[#a0a8b8]">
               Description
             </label>
-            <textarea
+            <TextArea
               value={draft.description}
               onChange={(event) =>
                 setDraft({ ...draft, description: event.target.value })
               }
               onBlur={() => save(draft)}
               placeholder="Add a description..."
-              className="min-h-[120px] w-full resize-none rounded-xl border border-[#e6e9f0] p-3 text-sm leading-6 text-[#566078] outline-none focus:ring-2 focus:ring-[#dfe3ff]"
+              className="min-h-[120px]"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <FormField label="List">
-              <select
+              <Select
                 value={draft.listId}
                 onChange={(event) => moveToList(event.target.value)}
-                className={inputClass}
               >
                 {lists.map((list) => (
                   <option key={list.id} value={list.id}>
                     {list.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </FormField>
             <FormField label="Status">
-              <select
+              <Select
                 value={draft.statusId}
                 onChange={(event) =>
                   save({ ...draft, statusId: event.target.value })
                 }
-                className={inputClass}
               >
                 <option value="">Select status</option>
                 {statuses.map((status) => (
@@ -153,10 +153,10 @@ export function TaskDrawer({
                     {status.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </FormField>
             <FormField label="Priority">
-              <select
+              <Select
                 value={draft.priority}
                 onChange={(event) =>
                   save({
@@ -164,14 +164,13 @@ export function TaskDrawer({
                     priority: event.target.value as Task["priority"],
                   })
                 }
-                className={inputClass}
               >
                 <option value="urgent">Urgent</option>
                 <option value="high">High</option>
                 <option value="normal">Normal</option>
                 <option value="low">Low</option>
                 <option value="none">None</option>
-              </select>
+              </Select>
             </FormField>
             <FormField label="Due date">
               <div className="relative">
@@ -179,18 +178,18 @@ export function TaskDrawer({
                   size={15}
                   className="pointer-events-none absolute left-3 top-3 text-[#9ba3b3]"
                 />
-                <input
+                <TextInput
                   type="date"
                   value={draft.dueDate ?? ""}
                   onChange={(event) =>
                     save({ ...draft, dueDate: event.target.value || null })
                   }
-                  className={`${inputClass} pl-9`}
+                  className="pl-9"
                 />
               </div>
             </FormField>
             <FormField label="Assignee">
-              <select
+              <Select
                 value={draft.assigneeIds[0] ?? ""}
                 onChange={(event) =>
                   save({
@@ -198,7 +197,6 @@ export function TaskDrawer({
                     assigneeIds: event.target.value ? [event.target.value] : [],
                   })
                 }
-                className={inputClass}
               >
                 <option value="">Unassigned</option>
                 {users.map((user) => (
@@ -206,7 +204,7 @@ export function TaskDrawer({
                     {user.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </FormField>
           </div>
           {canDelete && <button

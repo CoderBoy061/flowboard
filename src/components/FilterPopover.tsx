@@ -2,6 +2,7 @@ import { Filter, RotateCcw, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { TaskStatus, User, TaskFilters } from "../types";
 import { FilterField } from "./FilterField";
+import { Select } from "./controls/Select";
 
 export function FilterPopover({
   filters,
@@ -63,12 +64,11 @@ export function FilterPopover({
           </div>
           <div className="space-y-3">
             <FilterField label="Status">
-              <select
+              <Select
                 value={filters.statusId}
                 onChange={(event) =>
                   onChange({ ...filters, statusId: event.target.value })
                 }
-                className="filter-input"
               >
                 <option value="all">All statuses</option>
                 {statuses.map((status) => (
@@ -76,10 +76,10 @@ export function FilterPopover({
                     {status.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </FilterField>
             <FilterField label="Priority">
-              <select
+              <Select
                 value={filters.priority}
                 onChange={(event) =>
                   onChange({
@@ -87,7 +87,6 @@ export function FilterPopover({
                     priority: event.target.value as TaskFilters["priority"],
                   })
                 }
-                className="filter-input"
               >
                 <option value="all">All priorities</option>
                 <option value="urgent">Urgent</option>
@@ -95,15 +94,14 @@ export function FilterPopover({
                 <option value="normal">Normal</option>
                 <option value="low">Low</option>
                 <option value="none">None</option>
-              </select>
+              </Select>
             </FilterField>
             <FilterField label="Assignee">
-              <select
+              <Select
                 value={filters.assigneeId}
                 onChange={(event) =>
                   onChange({ ...filters, assigneeId: event.target.value })
                 }
-                className="filter-input"
               >
                 <option value="all">Everyone</option>
                 {users.map((user) => (
@@ -111,10 +109,10 @@ export function FilterPopover({
                     {user.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </FilterField>
             <FilterField label="Due date">
-              <select
+              <Select
                 value={filters.due}
                 onChange={(event) =>
                   onChange({
@@ -122,12 +120,11 @@ export function FilterPopover({
                     due: event.target.value as TaskFilters["due"],
                   })
                 }
-                className="filter-input"
               >
                 <option value="all">Any due date</option>
                 <option value="overdue">Overdue</option>
                 <option value="no_due">No due date</option>
-              </select>
+              </Select>
             </FilterField>
           </div>
           <button

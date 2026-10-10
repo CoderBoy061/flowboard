@@ -2,6 +2,7 @@ import { CalendarDays, UserRound } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { Task, TaskStatus, User } from "../types";
 import { getUserInitials } from "../utils/userUtils";
+import { Select } from "./controls/Select";
 const priorityStyles: Record<string, string> = {
   urgent: "text-priority-urgent-text",
   high: "text-priority-high-text",
@@ -49,11 +50,11 @@ export function ListView({
       <div className="flex items-center justify-end border-b border-[#eef0f5] px-5 py-2">
         <label className="flex items-center gap-2 text-xs font-semibold text-[#8790a3]">
           Sort by
-          <select value={sortBy} onChange={(event) => setSortBy(event.target.value as typeof sortBy)} className="cursor-pointer rounded-lg border border-[#e5e8f0] bg-white px-2 py-1.5 text-xs font-semibold text-[#566078] outline-none focus:ring-2 focus:ring-[#dfe3ff]">
+          <Select value={sortBy} onChange={(event) => setSortBy(event.target.value as typeof sortBy)} className="w-auto rounded-lg px-2 py-1.5 text-xs font-semibold">
             <option value="position">Manual order</option>
             <option value="dueDate">Due date</option>
             <option value="priority">Priority</option>
-          </select>
+          </Select>
         </label>
       </div>
       <div className="hidden grid-cols-[minmax(260px,2fr)_1fr_1fr_1fr_1fr] gap-4 border-b border-[#eef0f5] px-5 py-3 text-[10px] font-bold uppercase tracking-[0.13em] text-[#a0a8b8] md:grid">

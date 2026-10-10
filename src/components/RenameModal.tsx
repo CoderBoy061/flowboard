@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { TextInput } from "./controls/TextInput";
 
 export function RenameModal({
   label,
@@ -41,12 +42,12 @@ export function RenameModal({
             ×
           </button>
         </div>
-        <input
+        <TextInput
           autoFocus
           value={name}
           onChange={(event) => setName(event.target.value)}
           maxLength={100}
-          className="h-12 w-full rounded-xl border border-[#e5e8f0] px-4 text-sm outline-none focus:ring-2 focus:ring-[#5865e9]"
+          className="h-12 px-4 focus:ring-[#5865e9]"
         />
         <div className="mt-6 flex justify-end gap-2">
           <button

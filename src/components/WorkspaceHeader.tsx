@@ -1,5 +1,6 @@
 import { Plus, Search, Sparkles } from "lucide-react";
 import { FilterPopover } from "./FilterPopover";
+import { TextInput } from "./controls/TextInput";
 import type { TaskFilters, TaskStatus, User } from "../types";
 
 export function WorkspaceHeader({
@@ -41,11 +42,11 @@ export function WorkspaceHeader({
       <div className="flex flex-wrap items-center gap-2">
         <label className="flex h-10 min-w-[210px] items-center gap-2 rounded-xl border border-[#e5e8f0] bg-white px-3 text-sm text-[#8790a3] shadow-sm">
           <Search size={16} />
-          <input
+          <TextInput
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
             placeholder="Search tasks..."
-            className="w-full bg-transparent outline-none placeholder:text-[#a8afbd]"
+            className="w-full border-0 bg-transparent px-0 py-0 shadow-none placeholder:text-[#a8afbd] focus:ring-0"
           />
         </label>
         <FilterPopover

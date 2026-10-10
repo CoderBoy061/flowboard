@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { ContainerType } from "../types";
+import { TextInput } from "./controls/TextInput";
 
 export function CreateContainerModal({
   type,
@@ -42,13 +43,13 @@ export function CreateContainerModal({
             ×
           </button>
         </div>
-        <input
+        <TextInput
           autoFocus
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder={`Name your ${label}`}
           maxLength={100}
-          className="h-12 w-full rounded-xl border border-[#e5e8f0] px-4 text-sm outline-none focus:ring-2 focus:ring-[#5865e9]"
+          className="h-12 px-4 focus:ring-[#5865e9]"
         />
         <div className="mt-6 flex justify-end gap-2">
           <button
