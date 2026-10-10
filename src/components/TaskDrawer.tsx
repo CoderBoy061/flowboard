@@ -1,4 +1,4 @@
-import { CalendarDays, X } from "lucide-react";
+import { CalendarDays, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { deleteTask, moveTask, updateTask } from "../redux/reducers/workspaceSlice";
@@ -17,8 +17,11 @@ export function TaskDrawer({
   lists,
   statusesByList,
   users,
+  subtasks,
   onClose,
   onError,
+  onCreateSubtask,
+  onToggleSubtask,
   canDelete,
 }: {
   task: Task;
@@ -26,14 +29,18 @@ export function TaskDrawer({
   lists: Container[];
   statusesByList: Record<string, TaskStatus[]>;
   users: User[];
+  subtasks: Task[];
   onClose: () => void;
   onError: (error: unknown) => void;
+  onCreateSubtask: (parentTaskId: string, title: string) => void;
+  onToggleSubtask: (task: Task) => void;
   canDelete: boolean;
 }) {
   const dispatch = useDispatch();
   const [draft, setDraft] = useState(task);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [titleError, setTitleError] = useState(false);
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
   const save = (next: Task) => {
     setDraft(next);
     try {
@@ -128,6 +135,59 @@ export function TaskDrawer({
               className="min-h-[120px]"
             />
           </div>
+          <section aria-labelledby="subtasks-heading" className="rounded-xl border border-[#eef0f5] p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 id="subtasks-heading" className="text-sm font-bold text-[#273149]">
+                Subtasks
+              </h3>
+              <span className="rounded-md bg-[#f5f6fa] px-1.5 py-0.5 text-xs font-semibold text-[#8790a3]">
+                {subtasks.length}
+              </span>
+            </div>
+            <div className="space-y-2">
+              {subtasks.map((subtask) => (
+                <label key={subtask.id} className="flex cursor-pointer items-center gap-2 text-sm text-[#566078]">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(subtask.isCompleted)}
+                    onChange={() => onToggleSubtask(subtask)}
+                    className="h-4 w-4 cursor-pointer accent-[#5865e9]"
+                  />
+                  <span className={subtask.isCompleted ? "text-[#98a0b1] line-through" : ""}>
+                    {subtask.title}
+                  </span>
+                </label>
+              ))}
+              {!subtasks.length && (
+                <p className="text-xs text-[#98a0b1]">No subtasks yet.</p>
+              )}
+            </div>
+            <form
+              className="mt-3 flex gap-2"
+              onSubmit={(event) => {
+                event.preventDefault();
+                if (!newSubtaskTitle.trim()) return;
+                onCreateSubtask(task.id, newSubtaskTitle);
+                setNewSubtaskTitle("");
+              }}
+            >
+              <TextInput
+                value={newSubtaskTitle}
+                onChange={(event) => setNewSubtaskTitle(event.target.value)}
+                placeholder="Add a subtask"
+                aria-label="New subtask title"
+                className="min-w-0"
+              />
+              <button
+                type="submit"
+                aria-label="Add subtask"
+                disabled={!newSubtaskTitle.trim()}
+                className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-[#5865e9] text-white transition hover:bg-[#4855d8] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Plus size={17} />
+              </button>
+            </form>
+          </section>
           <div className="grid grid-cols-2 gap-3">
             <FormField label="List">
               <Select

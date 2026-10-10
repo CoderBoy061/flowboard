@@ -30,4 +30,6 @@ export interface Task {
   createdAt: string;
   updatedAt: string;
   isArchived: boolean;
+  parentTaskId?: string | null;
+  isCompleted?: boolean;
 }

@@ -13,6 +13,7 @@ export function TaskContent({
   onOpenTask,
   onError,
   onCreateTask,
+  onBulkUpdate,
 }: {
   loading: boolean;
   selectedList?: Container;
@@ -23,6 +24,10 @@ export function TaskContent({
   onOpenTask: (taskId: string) => void;
   onError: (error: unknown) => void;
   onCreateTask: (statusId: string) => void;
+  onBulkUpdate: (
+    taskIds: string[],
+    changes: Partial<Pick<Task, "priority" | "assigneeIds">>,
+  ) => void;
 }) {
   if (loading) return <BoardLoadingSkeleton />;
 
@@ -54,6 +59,7 @@ export function TaskContent({
       statuses={statuses}
       users={users}
       onOpenTask={onOpenTask}
+        onBulkUpdate={onBulkUpdate}
     />
   );
 }

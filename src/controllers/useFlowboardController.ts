@@ -7,8 +7,12 @@ import {
   addContainer,
   addStatuses,
   addTask,
+  bulkUpdateTasks,
   addWorkspace,
   archiveContainer,
+  restoreContainer,
+  restoreTask,
+  rollbackTasks,
   deleteWorkspace,
   hydrateWorkspace,
   markNotificationRead,
@@ -18,6 +22,7 @@ import {
   updateContainer,
   switchUser,
   switchWorkspace,
+  updateTask,
 } from "../redux/reducers/workspaceSlice";
 import type { WorkspaceState } from "../redux/reducers/workspaceSlice";
 import type { RootState } from "../redux/store";
@@ -76,6 +81,7 @@ export function useFlowboardController() {
   const [query, setQuery] = useState("");
   const [toast, setToast] = useState<string | null>(null);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [createTaskStatusId, setCreateTaskStatusId] = useState("");
   const [isWorkspaceModalOpen, setIsWorkspaceModalOpen] = useState(false);
@@ -118,6 +124,20 @@ export function useFlowboardController() {
     [filters, query, tasks],
   );
   const selectedTask = tasks.find((task) => task.id === selectedTaskId) ?? null;
+  const selectedSubtasks = selectedTask
+    ? workspace.tasks.filter(
+        (task) => task.parentTaskId === selectedTask.id && !task.isArchived,
+      )
+    : [];
+  const archivedContainers = workspace.containers.filter(
+    (container) =>
+      container.isArchived &&
+      (container.workspaceId ?? "workspace-1") === workspace.currentWorkspaceId,
+  );
+  const archivedTasks = workspace.tasks.filter((task) => {
+    const list = workspace.containers.find((container) => container.id === task.listId);
+    return task.isArchived && (list?.workspaceId ?? "workspace-1") === workspace.currentWorkspaceId;
+  });
   const userNotifications = useMemo(
     () =>
       (workspace.notifications ?? [])
@@ -190,6 +210,88 @@ export function useFlowboardController() {
       notifyError(error);
     }
   };
+
+  // Creates a child task that inherits the parent task context.
+  const handleCreateSubtask = (parentTaskId: string, title: string) => {
+    const parent = workspace.tasks.find((task) => task.id === parentTaskId);
+    if (!parent || !title.trim()) return;
+    const now = new Date().toISOString();
+    const subtask: Task = {
+      id: `task-${Date.now()}`,
+      listId: parent.listId,
+      title: title.trim(),
+      description: `Subtask of ${parent.title}`,
+      statusId: parent.statusId,
+      priority: parent.priority,
+      assigneeIds: [...parent.assigneeIds],
+      dueDate: parent.dueDate,
+      position: workspace.tasks.filter(
+        (task) => task.listId === parent.listId && task.parentTaskId === parent.id,
+      ).length,
+      createdAt: now,
+      updatedAt: now,
+      isArchived: false,
+      parentTaskId: parent.id,
+      isCompleted: false,
+    };
+    try {
+      dispatch(addTask(subtask));
+    } catch (error) {
+      notifyError(error);
+    }
+  };
+
+  // Toggles completion for a child task through the Redux store.
+  const handleToggleSubtask = (subtask: Task) => {
+    try {
+      dispatch(
+        updateTask({
+          ...subtask,
+          isCompleted: !subtask.isCompleted,
+          updatedAt: new Date().toISOString(),
+        }),
+      );
+    } catch (error) {
+      notifyError(error);
+    }
+  };
+
+  // Applies bulk changes and restores snapshots if the mutation fails.
+  const handleBulkUpdate = (
+    taskIds: string[],
+    changes: Partial<Pick<Task, "priority" | "assigneeIds">>,
+  ) => {
+    const snapshots = workspace.tasks
+      .filter((task) => taskIds.includes(task.id))
+      .map((task) => ({ ...task, assigneeIds: [...task.assigneeIds] }));
+    try {
+      dispatch(bulkUpdateTasks({ taskIds, changes }));
+    } catch (error) {
+      dispatch(rollbackTasks(snapshots));
+      notifyError(error);
+    }
+  };
+
+  // Restores an archived task for an administrator.
+  const handleRestoreTask = (taskId: string) => {
+    try {
+      dispatch(restoreTask(taskId));
+    } catch (error) {
+      notifyError(error);
+    }
+  };
+
+  // Restores an archived container branch for an administrator.
+  const handleRestoreContainer = (containerId: string) => {
+    try {
+      dispatch(restoreContainer(containerId));
+    } catch (error) {
+      notifyError(error);
+    }
+  };
+
+  const openArchive = useCallback(() => setIsArchiveOpen(true), []);
+  const closeArchive = useCallback(() => setIsArchiveOpen(false), []);
 
   const handleCreateWorkspace = (name: string) => {
     // Creates a workspace scaffold and persists its initial containers.
@@ -385,12 +487,16 @@ export function useFlowboardController() {
     accessibleLists,
     filteredTasks,
     selectedTask,
+    selectedSubtasks,
+    archivedTasks,
+    archivedContainers,
     query,
     setQuery,
     toast,
     userNotifications,
     unreadNotificationCount,
     isNotificationsOpen,
+    isArchiveOpen,
     filters,
     setFilters,
     isLoading,
@@ -405,6 +511,13 @@ export function useFlowboardController() {
     setCreateTarget,
     setSelectedTaskId,
     handleCreate,
+    handleCreateSubtask,
+    handleToggleSubtask,
+    handleBulkUpdate,
+    handleRestoreTask,
+    handleRestoreContainer,
+    openArchive,
+    closeArchive,
     handleCreateWorkspace,
     handleRename,
     handleCreateContainer,

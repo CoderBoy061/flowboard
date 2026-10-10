@@ -90,6 +90,7 @@ export const selectTasksForList = createSelector(
       .filter(
         (task) =>
           task.listId === listId &&
+          !task.parentTaskId &&
           !task.isArchived,
       )
       .sort((a, b) => a.position - b.position);

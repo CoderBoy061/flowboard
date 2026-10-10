@@ -32,7 +32,7 @@ App
 ├── Sidebar → visible-container selector → permission service
 ├── TopBar → current-user switcher
 ├── KanbanBoard → native drag/drop → Redux moveTask
-├── ListView → task selector → TaskDrawer
+├── ListView → filtering/sorting/pagination/bulk actions → TaskDrawer
 ├── WorkspaceHeader / ViewSwitcher / TaskContent
 └── CreateTaskModal / CreateContainerModal / RenameModal
 
@@ -43,7 +43,28 @@ Redux workspace store
 └── selectors that filter the tree and tasks
 ```
 
-`src/types` contains domain models. `src/data/mockData.ts` contains one workspace, two spaces, two folders, three lists, fifteen tasks, three users, statuses, and sample grants. `src/redux` owns the client data layer. UI pieces live in `src/components`. A complete manual requirement-by-requirement test plan is in `PDF_TEST_CHECKLIST.md`.
+`src/types` contains domain models. `src/data/mockData.ts` contains one workspace, two spaces, two folders, three lists, fifteen tasks, three users, statuses, and sample grants. `src/redux` owns the client data layer. UI pieces live in `src/components`. A complete manual requirement-by-requirement test plan is kept locally in `PDF_TEST_CHECKLIST.md`.
+
+## Technology choices
+
+- React and TypeScript provide typed, component-based UI development.
+- Vite provides the development server and production build pipeline. The development server is fixed to port `3000`.
+- Redux Toolkit was chosen for the client data layer because the assignment needs one predictable source of truth for containers, tasks, statuses, users, grants, notifications, and mutations. It also provides concise reducers, typed actions, and a natural place for permission middleware.
+- Redux selectors keep permission filtering and task access rules outside presentation components. The middleware repeats protected mutation checks so hiding a resource in the UI is not the only enforcement layer.
+- `react-persist-state-hook`, developed and maintained by me, persists the Redux workspace snapshot and UI preferences to localStorage while reducing persistence boilerplate.
+- Tailwind CSS is used through utility classes and a small theme token set for colors, typography, radii, shadows, statuses, and priorities.
+- Native HTML drag-and-drop keeps the dependency footprint small. The trade-off is that browser drag behavior is less customizable than a dedicated DnD library.
+- Vitest and Testing Library cover store, selector, permission, validation, and component behavior.
+
+## Implemented enhancements
+
+- Multiple assignee selection uses the reusable `MultiSelect` control and stores selected user IDs in `assigneeIds`.
+- List view pagination displays three tasks per page and keeps sorting before pagination.
+- List view bulk actions update priority or assignees for selected tasks through one Redux mutation.
+- Subtasks use `parentTaskId` and `isCompleted`; they are created and completed from the task drawer while remaining grouped under their parent.
+- Tasks and containers use soft archive behavior. Administrators can open the archive panel and restore archived records; restoring a container restores its descendants.
+- Bulk mutations capture task snapshots and dispatch `rollbackTasks` when a protected mutation fails. The local store is synchronous, so this provides rollback safety for local errors rather than simulating a network request.
+- `Pagination`, `MultiSelect`, `Select`, `TextInput`, and `TextArea` are reusable typed controls/components.
 
 ## Data model
 
@@ -81,7 +102,7 @@ Task creation trims title, description, and due date. Title is limited to 150 ch
 - [x] Unit/store tests and a Testing Library component test
 - [x] README architecture, data model, permission, trade-off, and AI usage documentation
 
-The PDF's optional stretch goals are intentionally limited: client-side search and an activity notification panel are included. Pagination, subtasks, optimistic rollback, bulk updates, Storybook, and deployment are not required for the MVP.
+The PDF's optional stretch goals are intentionally limited: client-side search and an activity notification panel are included. Pagination, subtasks, rollback safety, bulk updates, and archive restoration are also implemented as local enhancements. Storybook, deployment, and backend/API integration remain outside this client-only project.
 
 ## Permissions
 
@@ -93,7 +114,7 @@ The active user is Alice (admin), Bob, or Carol. Admins bypass resource restrict
 
 Native HTML drag/drop is used for task cards. Tailwind utility classes are used in JSX, with a white/light visual system and no custom layout CSS.
 
-This pass focuses on hierarchy navigation, container CRUD and sibling reorder, board/list views, list sorting, task create/read/update/archive, moving tasks between lists, status changes, drag/drop, task drawer, user switching, selectors, middleware, persistence, and responsive layout.
+This pass focuses on hierarchy navigation, container CRUD and sibling reorder, board/list views, list sorting and pagination, bulk task actions, task create/read/update/archive/restore, subtasks, moving tasks between lists, status changes, drag/drop, task drawer, user switching, selectors, middleware, persistence, and responsive layout.
 
 ## Tests
 
@@ -109,7 +130,7 @@ npm run lint
 
 ## Trade-offs and next steps
 
-This is a client-only single-tenant demo, so localStorage is not a security boundary and changes are isolated per browser. Workspace switching and container management go beyond the assignment's single-workspace minimum because they make the permission demo easier to exercise. Pagination, subtasks, activity history, optimistic rollback, backend authorization, and server synchronization were cut for the MVP. Next week I would add an API adapter, server-side permission enforcement, undoable archive, and richer keyboard/accessibility coverage.
+This is a client-only single-tenant demo, so localStorage is not a security boundary and changes are isolated per browser. Workspace switching, container management, pagination, bulk actions, subtasks, and archive restoration go beyond the assignment's minimum because they make the client demo easier to exercise. Rollback handling is limited to synchronous local mutation failures; a future API adapter would need request IDs, pending state, retry behavior, and server-side rollback conflict handling. Next week I would add server-side authorization, API synchronization, richer keyboard/accessibility coverage, and a deployment workflow.
 
 ## AI usage log
 

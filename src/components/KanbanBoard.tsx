@@ -38,6 +38,7 @@ export function KanbanBoard({
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
   const [dragOverStatusId, setDragOverStatusId] = useState<string | null>(null);
   const [dragOverTaskId, setDragOverTaskId] = useState<string | null>(null);
+  // Persists the dragged task's status and position through the Redux mutation.
   const onDrop = (event: React.DragEvent, statusId: string, position: number) => {
     event.preventDefault();
     event.stopPropagation();
@@ -55,7 +56,7 @@ export function KanbanBoard({
   return (
     <div
       data-list-id={listId}
-      className="grid min-h-[540px] gap-4 overflow-x-auto pb-3 md:grid-cols-3"
+      className="grid h-[calc(100vh-220px)] min-h-[420px] max-h-[calc(100vh-220px)] gap-4 overflow-hidden pb-3 md:grid-cols-3"
     >
       {[...statuses]
         .sort((a, b) => a.position - b.position)
@@ -75,7 +76,7 @@ export function KanbanBoard({
                   columnTasks.length,
                 )
               }
-              className={`min-w-[270px] rounded-panel border p-3 transition ${dragOverStatusId === status.id ? "border-brand-500 bg-brand-50 ring-2 ring-brand-500/20" : "border-border bg-[#f1f3f8]"}`}
+              className={`flex h-full min-h-0 min-w-0 flex-col rounded-panel border p-3 transition ${dragOverStatusId === status.id ? "border-brand-500 bg-brand-50 ring-2 ring-brand-500/20" : "border-border bg-[#f1f3f8]"}`}
             >
               <div className="mb-3 flex items-center justify-between px-2">
                 <div className="flex items-center gap-2">
@@ -98,8 +99,14 @@ export function KanbanBoard({
                   +
                 </button>
               </div>
-              <div className="space-y-3">
-                {columnTasks.map((task, index) => (
+              <div className="relative min-h-0 flex-1 overflow-y-auto pr-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {draggingTaskId && dragOverStatusId === status.id ? (
+                  <div className="absolute inset-0 flex items-center justify-center rounded-xl border-2 border-dashed border-brand-500 bg-brand-50/80 text-sm font-semibold text-brand-500">
+                    Drop here
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {columnTasks.map((task, index) => (
                   <article
                     key={task.id}
                     draggable
@@ -121,7 +128,7 @@ export function KanbanBoard({
                     }}
                     onDragEnd={() => { setDraggingTaskId(null); setDragOverStatusId(null); setDragOverTaskId(null); }}
                     onClick={() => onOpenTask(task.id)}
-                    className={`group cursor-grab rounded-control border border-[#e5e8f0] bg-surface p-4 shadow-card transition hover:-translate-y-0.5 hover:border-[#cfd4ff] hover:shadow-md active:cursor-grabbing ${draggingTaskId === task.id ? "scale-[1.02] opacity-50" : ""} ${dragOverTaskId === task.id && draggingTaskId !== task.id ? "border-brand-500 ring-2 ring-brand-500/20" : ""}`}
+                    className={`group cursor-grab rounded-control border border-[#e5e8f0] bg-surface p-4 shadow-card transition hover:-translate-y-0.5 hover:border-[#cfd4ff] hover:shadow-md active:cursor-grabbing ${draggingTaskId === task.id ? "scale-[1.02] opacity-30" : ""} ${dragOverTaskId === task.id && draggingTaskId !== task.id ? "border-brand-500 ring-2 ring-brand-500/20" : ""}`}
                   >
                     <div className="mb-3 flex items-start justify-between gap-2">
                       <p className="text-sm font-semibold leading-5 text-[#273149]">
@@ -166,9 +173,11 @@ export function KanbanBoard({
                       )}
                     </div>
                   </article>
-                ))}
+                    ))}
+                  </div>
+                )}
               </div>
-              {columnTasks.length === 0 && (
+              {columnTasks.length === 0 && !draggingTaskId && (
                 <div className="rounded-xl border border-dashed border-[#d9deea] py-9 text-center text-xs text-[#a3aabb]">
                   Drop tasks here
                 </div>

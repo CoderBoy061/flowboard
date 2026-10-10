@@ -18,6 +18,10 @@ const protectedActions = new Set([
   "workspace/archiveTask",
   "workspace/updateContainer",
   "workspace/archiveContainer",
+  "workspace/restoreTask",
+  "workspace/restoreContainer",
+  "workspace/bulkUpdateTasks",
+  "workspace/rollbackTasks",
   "workspace/reorderContainers",
   "workspace/addContainer",
   "workspace/addStatuses",
@@ -43,6 +47,7 @@ export const permissionMiddleware: Middleware =
             resourceId?: string;
             parentId?: string | null;
             orderedIds?: string[];
+            taskIds?: string[];
             name?: string;
             type?: "space" | "folder" | "list";
             workspaceId?: string;
@@ -54,6 +59,10 @@ export const permissionMiddleware: Middleware =
     const currentUser = state.users.find(
       (user) => user.id === state.currentUserId,
     );
+    const payload =
+      typeof typedAction.payload === "string"
+        ? { id: typedAction.payload }
+        : typedAction.payload;
     if (
       (typedAction.type === "workspace/addWorkspace" ||
         typedAction.type === "workspace/renameWorkspace" ||
@@ -76,7 +85,9 @@ export const permissionMiddleware: Middleware =
     if (
       (typedAction.type === "workspace/deleteTask" ||
         typedAction.type === "workspace/archiveTask" ||
-        typedAction.type === "workspace/archiveContainer") &&
+        typedAction.type === "workspace/archiveContainer" ||
+        typedAction.type === "workspace/restoreTask" ||
+        typedAction.type === "workspace/restoreContainer") &&
       currentUser?.role !== "admin"
     ) {
       throw createStoreError(
@@ -95,10 +106,25 @@ export const permissionMiddleware: Middleware =
         "Only workspace admins can manage containers.",
       );
     }
-    const payload =
-      typeof typedAction.payload === "string"
-        ? { id: typedAction.payload }
-        : typedAction.payload;
+    if (typedAction.type === "workspace/rollbackTasks") return next(action);
+    if (typedAction.type === "workspace/bulkUpdateTasks") {
+      const taskIds = payload?.taskIds ?? [];
+      const selectedTasks = state.tasks.filter((task) => taskIds.includes(task.id));
+      if (!taskIds.length || selectedTasks.length !== taskIds.length) {
+        throw createStoreError("NOT_FOUND", "One or more selected tasks could not be found.");
+      }
+      if (
+        selectedTasks.some(
+          (task) => !canAccessResource(task.listId, state.currentUserId, state),
+        )
+      ) {
+        throw createStoreError(
+          "FORBIDDEN",
+          "You do not have permission to update one or more selected tasks.",
+        );
+      }
+      return next(action);
+    }
     if (typedAction.type === "workspace/addContainer") {
       const newContainer = payload;
       const parent = newContainer?.parentId

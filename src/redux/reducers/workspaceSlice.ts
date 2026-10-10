@@ -322,6 +322,50 @@ const workspaceSlice = createSlice({
       }
     },
 
+    // Restores a previously archived task without changing its identity.
+    restoreTask(state, action: PayloadAction<string>) {
+      const task = state.tasks.find((item) => item.id === action.payload);
+      if (task) task.isArchived = false;
+    },
+
+    // Restores an archived container branch and its descendants.
+    restoreContainer(state, action: PayloadAction<string>) {
+      const restoreBranch = (containerId: string) => {
+        const container = state.containers.find((item) => item.id === containerId);
+        if (!container) return;
+        container.isArchived = false;
+        state.containers
+          .filter((item) => item.parentId === containerId)
+          .forEach((child) => restoreBranch(child.id));
+      };
+      restoreBranch(action.payload);
+    },
+
+    // Applies one change set to multiple tasks in a single store mutation.
+    bulkUpdateTasks(
+      state,
+      action: PayloadAction<{
+        taskIds: string[];
+        changes: Partial<Pick<Task, "priority" | "assigneeIds">>;
+      }>,
+    ) {
+      state.tasks.forEach((task) => {
+        if (action.payload.taskIds.includes(task.id) && !task.isArchived) {
+          Object.assign(task, action.payload.changes, {
+            updatedAt: new Date().toISOString(),
+          });
+        }
+      });
+    },
+
+    // Restores task snapshots if a later optimistic operation fails.
+    rollbackTasks(state, action: PayloadAction<Task[]>) {
+      action.payload.forEach((snapshot) => {
+        const index = state.tasks.findIndex((task) => task.id === snapshot.id);
+        if (index !== -1) state.tasks[index] = snapshot;
+      });
+    },
+
     markNotificationsRead(state, action: PayloadAction<string>) {
       state.notifications.forEach((notification) => {
         if (notification.recipientUserId === action.payload) notification.read = true;
@@ -337,7 +381,7 @@ const workspaceSlice = createSlice({
   },
 });
 
-export const { hydrateWorkspace, switchUser, addWorkspace, switchWorkspace, renameWorkspace, deleteWorkspace, addTask, updateTask, deleteTask, moveTask, addContainer, addStatuses, updateContainer, archiveContainer, reorderContainers, archiveTask, markNotificationsRead, markNotificationRead } =
+export const { hydrateWorkspace, switchUser, addWorkspace, switchWorkspace, renameWorkspace, deleteWorkspace, addTask, updateTask, deleteTask, moveTask, addContainer, addStatuses, updateContainer, archiveContainer, reorderContainers, archiveTask, restoreTask, restoreContainer, bulkUpdateTasks, rollbackTasks, markNotificationsRead, markNotificationRead } =
   workspaceSlice.actions;
 
 export default workspaceSlice.reducer;

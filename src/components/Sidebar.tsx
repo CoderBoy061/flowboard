@@ -1,4 +1,4 @@
-import { FolderPlus, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { ArchiveRestore, FolderPlus, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { memo, useMemo, useState } from "react";
 import { useAppSelector } from "../redux/hooks";
 import { selectVisibleContainers } from "../redux/selectors";
@@ -15,6 +15,7 @@ export const Sidebar = memo(function Sidebar({
   currentWorkspaceId,
   onWorkspaceChange,
   onCreateWorkspace,
+  onOpenArchive,
   onRenameWorkspace,
   onDeleteWorkspace,
   onRenameContainer,
@@ -32,6 +33,7 @@ export const Sidebar = memo(function Sidebar({
   currentWorkspaceId: string;
   onWorkspaceChange: (id: string) => void;
   onCreateWorkspace: () => void;
+  onOpenArchive: () => void;
   onRenameWorkspace: (id: string) => void;
   onDeleteWorkspace: (id: string) => void;
   onRenameContainer: (id: string) => void;
@@ -101,9 +103,14 @@ export const Sidebar = memo(function Sidebar({
             onCreate={onCreateWorkspace}
             canManage={canDelete}
           />
-          {canDelete && <button onClick={() => onCreateChild(null, "space")} className="cursor-pointer text-[#a2a9b8] hover:text-[#5865e9]" title="Create space">
-            <FolderPlus size={15} />
-          </button>}
+          {canDelete && <div className="flex items-center gap-3">
+            <button onClick={onOpenArchive} className="cursor-pointer text-[#a2a9b8] hover:text-[#5865e9]" title="Open archived items">
+              <ArchiveRestore size={15} />
+            </button>
+            <button onClick={() => onCreateChild(null, "space")} className="cursor-pointer text-[#a2a9b8] hover:text-[#5865e9]" title="Create space">
+              <FolderPlus size={15} />
+            </button>
+          </div>}
         </div>
         {loading ? <TreeLoadingSkeleton /> : <div className="space-y-1">
           {spaces.map((space) => (

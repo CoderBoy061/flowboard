@@ -9,6 +9,7 @@ import { RenameModal } from "./components/RenameModal";
 import { TaskDrawer } from "./components/TaskDrawer";
 import { CreateTaskModal } from "./components/CreateTaskModal";
 import { NotificationPanel } from "./components/NotificationPanel";
+import { ArchivedItemsPanel } from "./components/ArchivedItemsPanel";
 import { useFlowboardController } from "./controllers/useFlowboardController";
 
 function App() {
@@ -21,12 +22,16 @@ function App() {
     accessibleLists,
     filteredTasks,
     selectedTask,
+    selectedSubtasks,
+    archivedTasks,
+    archivedContainers,
     query,
     setQuery,
     toast,
     userNotifications,
     unreadNotificationCount,
     isNotificationsOpen,
+    isArchiveOpen,
     filters,
     setFilters,
     isLoading,
@@ -42,6 +47,7 @@ function App() {
     setCreateTarget,
     setSelectedTaskId,
     handleCreate,
+    handleBulkUpdate,
     handleCreateWorkspace,
     handleRename,
     handleCreateContainer,
@@ -55,6 +61,8 @@ function App() {
     closeNotifications,
     markAllNotificationsRead,
     markNotificationAsRead,
+    openArchive,
+    closeArchive,
     openCreateWorkspace,
     openRenameWorkspace,
     deleteWorkspaceFromSidebar,
@@ -80,6 +88,7 @@ function App() {
           currentWorkspaceId={workspace.currentWorkspaceId}
           onWorkspaceChange={changeWorkspace}
           onCreateWorkspace={openCreateWorkspace}
+          onOpenArchive={openArchive}
           onRenameWorkspace={openRenameWorkspace}
           onDeleteWorkspace={deleteWorkspaceFromSidebar}
           onRenameContainer={openRenameContainer}
@@ -125,6 +134,7 @@ function App() {
               onOpenTask={setSelectedTaskId}
               onError={notifyError}
               onCreateTask={openCreateTask}
+              onBulkUpdate={handleBulkUpdate}
             />
           </div>
         </main>
@@ -136,8 +146,11 @@ function App() {
           lists={accessibleLists}
           statusesByList={workspace.statusesByList}
           users={workspace.users}
+          subtasks={selectedSubtasks}
           onClose={() => setSelectedTaskId(null)}
           onError={notifyError}
+          onCreateSubtask={controller.handleCreateSubtask}
+          onToggleSubtask={controller.handleToggleSubtask}
           canDelete={canDelete}
         />
       )}
@@ -185,6 +198,15 @@ function App() {
           onClose={closeNotifications}
           onMarkAllRead={markAllNotificationsRead}
           onMarkRead={markNotificationAsRead}
+        />
+      )}
+      {isArchiveOpen && (
+        <ArchivedItemsPanel
+          tasks={archivedTasks}
+          containers={archivedContainers}
+          onClose={closeArchive}
+          onRestoreTask={controller.handleRestoreTask}
+          onRestoreContainer={controller.handleRestoreContainer}
         />
       )}
     </div>
