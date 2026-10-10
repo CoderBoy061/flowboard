@@ -11,6 +11,8 @@ npm run dev
 
 Validation: `npm run build` and `npm run test -- --run`.
 
+Manual PDF verification: see [PDF_TEST_CHECKLIST.md](./PDF_TEST_CHECKLIST.md).
+
 ## Architecture
 
 ```text
@@ -30,7 +32,7 @@ Redux workspace store
 └── selectors that filter the tree and tasks
 ```
 
-`src/types` contains domain models. `src/data/mockData.ts` contains one workspace, two spaces, two folders, three lists, fifteen tasks, three users, statuses, and sample grants. `src/redux` owns the client data layer. UI pieces live in `src/components`.
+`src/types` contains domain models. `src/data/mockData.ts` contains one workspace, two spaces, two folders, three lists, fifteen tasks, three users, statuses, and sample grants. `src/redux` owns the client data layer. UI pieces live in `src/components`. A complete manual requirement-by-requirement test plan is in `PDF_TEST_CHECKLIST.md`.
 
 ## Data model
 
