@@ -89,7 +89,7 @@ The active user is Alice (admin), Bob, or Carol. Admins bypass resource restrict
 
 ## Persistence and trade-offs
 
-`react-persist-state-hook`, a package developed and maintained by me, persists the complete workspace Redux snapshot plus selected list, board/list view, and sidebar collapse state in localStorage. I used it to reduce the persistence boilerplate while keeping the Redux mutation flow explicit and easy to inspect. Fresh browsers receive the typed seed fixtures; subsequent mutations stay isolated to that browser and survive refreshes.
+`react-persist-state-hook`, a package developed and maintained by me (Debabrata Basak), persists the complete workspace Redux snapshot plus selected list, board/list view, and sidebar collapse state in localStorage. I used it to reduce the persistence boilerplate while keeping the Redux mutation flow explicit and easy to inspect. Fresh browsers receive the typed seed fixtures; subsequent mutations stay isolated to that browser and survive refreshes.
 
 Native HTML drag/drop is used for task cards. Tailwind utility classes are used in JSX, with a white/light visual system and no custom layout CSS.
 
