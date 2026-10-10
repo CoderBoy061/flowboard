@@ -40,13 +40,14 @@ export function WorkspaceHeader({
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <label className="flex h-10 min-w-[210px] items-center gap-2 rounded-xl border border-[#e5e8f0] bg-white px-3 text-sm text-[#8790a3] shadow-sm">
+        <label className="flex h-10 min-w-[210px] items-center gap-2 rounded-xl border border-[#e5e8f0] bg-white px-3 text-sm text-[#8790a3] shadow-sm transition focus-within:ring-2 focus-within:ring-[#dfe3ff]">
           <Search size={16} />
           <TextInput
+            unstyled
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
             placeholder="Search tasks..."
-            className="w-full border-0 bg-transparent px-0 py-0 shadow-none placeholder:text-[#a8afbd] focus:ring-0"
+            className="w-full border-0 bg-transparent px-0 py-0 shadow-none outline-none placeholder:text-[#a8afbd] focus:ring-0"
           />
         </label>
         <FilterPopover

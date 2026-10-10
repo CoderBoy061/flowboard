@@ -2,6 +2,7 @@ import type { InputHTMLAttributes } from "react";
 
 export type TextInputProps = InputHTMLAttributes<HTMLInputElement> & {
   invalid?: boolean;
+  unstyled?: boolean;
 };
 
 const inputClasses =
@@ -11,13 +12,14 @@ const inputClasses =
 export function TextInput({
   className = "",
   invalid = false,
+  unstyled = false,
   ...props
 }: TextInputProps) {
   return (
     <input
       {...props}
       aria-invalid={invalid || props["aria-invalid"]}
-      className={`${inputClasses} ${invalid ? "border-[#d94d5d] focus:ring-[#ffd9dd]" : "border-[#e5e8f0]"} ${className}`}
+      className={`${unstyled ? "" : inputClasses} ${unstyled ? "" : invalid ? "border-[#d94d5d] focus:ring-[#ffd9dd]" : "border-[#e5e8f0]"} ${className}`}
     />
   );
 }

@@ -47,10 +47,10 @@ export function ListView({
 
   return (
     <div className="overflow-hidden rounded-2xl border border-[#e7eaf1] bg-white shadow-[0_4px_18px_rgba(35,45,75,0.03)]">
-      <div className="flex items-center justify-end border-b border-[#eef0f5] px-5 py-2">
-        <label className="flex items-center gap-2 text-xs font-semibold text-[#8790a3]">
+      <div className="flex items-center justify-end overflow-x-auto border-b border-[#eef0f5] px-5 py-2">
+        <label className="flex shrink-0 items-center gap-2 whitespace-nowrap text-xs font-semibold text-[#8790a3]">
           Sort by
-          <Select value={sortBy} onChange={(event) => setSortBy(event.target.value as typeof sortBy)} className="w-auto rounded-lg px-2 py-1.5 text-xs font-semibold">
+          <Select value={sortBy} onChange={(event) => setSortBy(event.target.value as typeof sortBy)} className="w-[136px] rounded-lg px-2 py-1.5 text-xs font-semibold">
             <option value="position">Manual order</option>
             <option value="dueDate">Due date</option>
             <option value="priority">Priority</option>
