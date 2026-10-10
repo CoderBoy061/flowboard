@@ -48,6 +48,28 @@ Containers are ordered nodes with `space`, `folder`, or `list` type and a `paren
 
 Task creation trims title, description, and due date. Title is limited to 150 characters by the product UI; description is required but may be one character. These are product validation choices in addition to the assignment's domain model.
 
+## PDF MVP verification checklist
+
+- [x] Typed workspace, container, task, status, user, and grant models
+- [x] Seed fixtures: one workspace, two spaces, two folders, three lists, fifteen tasks, three users, and sample grants
+- [x] Workspace tree with space, folder, and list navigation
+- [x] Container create, rename, archive, and sibling reorder
+- [x] Task create, read, update, archive, status change, list move, and position reorder
+- [x] Per-list To Do, In Progress, and Done statuses
+- [x] Kanban board with drag preview, drop highlight, empty columns, and status-column task creation
+- [x] List view with task fields and due-date/priority sorting
+- [x] Task detail drawer with editing, Escape, overlay close, and delete confirmation
+- [x] Alice, Bob, and Carol user switcher
+- [x] Public/private containers, allow/deny grants, admin bypass, and inherited access
+- [x] Store/selectors/middleware permission enforcement with consistent errors
+- [x] Tailwind-only light visual system with theme tokens
+- [x] Loading shimmer, empty states, error toast, hover/focus/active feedback
+- [x] LocalStorage persistence through `react-persist-state-hook`
+- [x] Unit/store tests and a Testing Library component test
+- [x] README architecture, data model, permission, trade-off, and AI usage documentation
+
+The PDF's optional stretch goals are intentionally limited: client-side search and an activity notification panel are included. Pagination, subtasks, optimistic rollback, bulk updates, Storybook, and deployment are not required for the MVP.
+
 ## Permissions
 
 The active user is Alice (admin), Bob, or Carol. Admins bypass resource restrictions. Public spaces are visible to members unless denied; private containers require an explicit allow grant, and members inherit access from an allowed ancestor. A direct deny takes precedence. Selectors filter inaccessible tree paths and tasks, while Redux middleware repeats the check for protected mutations, so UI hiding is not the security boundary. A backend version could extend grants with teams and inherited policy evaluation.
