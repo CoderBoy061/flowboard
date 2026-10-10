@@ -5,6 +5,7 @@ import { deleteTask, moveTask, updateTask } from "../redux/reducers/workspaceSli
 import type { Container, Task, TaskStatus, User } from "../types";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { FormField } from "./FormField";
+import { MultiSelect } from "./controls/MultiSelect";
 import { Select } from "./controls/Select";
 import { TextArea } from "./controls/TextArea";
 import { TextInput } from "./controls/TextInput";
@@ -188,23 +189,17 @@ export function TaskDrawer({
                 />
               </div>
             </FormField>
-            <FormField label="Assignee">
-              <Select
-                value={draft.assigneeIds[0] ?? ""}
-                onChange={(event) =>
-                  save({
-                    ...draft,
-                    assigneeIds: event.target.value ? [event.target.value] : [],
-                  })
-                }
-              >
-                <option value="">Unassigned</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name}
-                  </option>
-                ))}
-              </Select>
+            <FormField label="Assignees">
+              <MultiSelect
+                value={draft.assigneeIds}
+                onChange={(assigneeIds) => save({ ...draft, assigneeIds })}
+                options={users.map((user) => ({ value: user.id, label: user.name }))}
+                aria-label="Assignees"
+                placeholder="Unassigned"
+              />
+              <span className="mt-1.5 block text-xs text-[#98a0b1]">
+                Select one or more members. Leave empty for unassigned.
+              </span>
             </FormField>
           </div>
           {canDelete && <button

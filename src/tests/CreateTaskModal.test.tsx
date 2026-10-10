@@ -35,7 +35,8 @@ describe("CreateTaskModal", () => {
     await user.type(screen.getByPlaceholderText("Add context for your team..."), description);
     const selects = screen.getAllByRole("combobox");
     await user.selectOptions(selects[1], "urgent");
-    await user.selectOptions(selects[2], "user-bob");
+    await user.click(screen.getByRole("button", { name: "Assignees" }));
+    await user.click(screen.getByRole("option", { name: "Bob Smith" }));
     fireEvent.change(screen.getByLabelText("Due date"), {
       target: { value: "2026-10-29" },
     });
