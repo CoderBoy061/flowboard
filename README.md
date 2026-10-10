@@ -4,10 +4,21 @@ Flowboard is a small, light-only project-management client for one workspace. It
 
 ## Run locally
 
+Clone the repository and install its dependencies:
+
 ```bash
+git clone git@github.com:CoderBoy061/flowboard.git
+cd flowboard
 npm install
+```
+
+Start the Vite development server:
+
+```bash
 npm run dev
 ```
+
+The app runs at [http://localhost:3000](http://localhost:3000). Vite is configured with a strict port, so it will report an error instead of silently switching ports if `3000` is already in use.
 
 Validation: `npm run build` and `npm run test -- --run`.
 
