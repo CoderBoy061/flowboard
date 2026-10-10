@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --color-canvas: #f7f8fc;
+  --color-surface: #ffffff;
+  --color-ink-900: #172033;
+  --color-ink-700: #566078;
+  --color-muted: #98a0b1;
+  --color-border: #e7eaf1;
+
+  --color-brand-50: #eef0ff;
+  --color-brand-500: #5865e9;
+  --color-brand-600: #4855d8;
+
+  --color-status-todo: #64748b;
+  --color-status-progress: #6366f1;
+  --color-status-done: #16a34a;
+
+  --color-priority-urgent-bg: #fff0f1;
+  --color-priority-urgent-text: #d94d5d;
+  --color-priority-high-bg: #fff5e8;
+  --color-priority-high-text: #d48620;
+  --color-priority-normal-bg: #eef0ff;
+  --color-priority-normal-text: #5865e9;
+  --color-priority-low-bg: #f1f3f6;
+  --color-priority-low-text: #7c8498;
+  --color-priority-none-bg: #f7f8fc;
+  --color-priority-none-text: #a0a8b8;
+
+  --radius-panel: 1rem;
+  --radius-control: 0.75rem;
+  --shadow-card: 0 2px 7px rgb(35 45 75 / 4%);
+  --shadow-popover: 0 12px 30px rgb(35 45 75 / 14%);
+  --animate-shimmer: shimmer 1.8s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@utility skeleton-shimmer {
+  background-image: linear-gradient(90deg, #eef0f5 0%, #ffffff 50%, #eef0f5 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s linear infinite;
+}
+
+@utility filter-input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e8f0;
+  background-color: #ffffff;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  color: #566078;
+  outline: none;
+}
