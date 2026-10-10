@@ -22,7 +22,7 @@ The app runs at [http://localhost:3000](http://localhost:3000). Vite is configur
 
 Validation: `npm run build` and `npm run test -- --run`.
 
-Manual PDF verification: see [PDF_TEST_CHECKLIST.md](./PDF_TEST_CHECKLIST.md).
+The detailed PDF verification checklist is kept locally for manual testing and is intentionally not included in the repository.
 
 ## Architecture
 
