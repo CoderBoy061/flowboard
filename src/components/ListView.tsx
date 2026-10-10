@@ -67,16 +67,24 @@ export function ListView({
     currentPage * PAGE_SIZE,
     (currentPage + 1) * PAGE_SIZE,
   );
-  const toggleTask = (taskId: string) =>
-    setSelectedTaskIds((current) =>
-      current.includes(taskId)
-        ? current.filter((id) => id !== taskId)
-        : [...current, taskId],
+  const toggleTask = (taskId: string) => {
+    const nextSelectedIds = selectedTaskIds.includes(taskId)
+      ? selectedTaskIds.filter((id) => id !== taskId)
+      : [...selectedTaskIds, taskId];
+    const existingAssigneeIds = Array.from(
+      new Set(
+        tasks
+          .filter((task) => nextSelectedIds.includes(task.id))
+          .flatMap((task) => task.assigneeIds),
+      ),
     );
+    setSelectedTaskIds(nextSelectedIds);
+    setBulkAssigneeIds(existingAssigneeIds);
+  };
 
   return (
     <div className="overflow-hidden rounded-2xl border border-[#e7eaf1] bg-white shadow-[0_4px_18px_rgba(35,45,75,0.03)]">
-      <div className="flex flex-nowrap items-center justify-between gap-3 overflow-x-auto border-b border-[#eef0f5] px-5 py-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="relative z-10 flex flex-nowrap items-center justify-between gap-3 overflow-visible border-b border-[#eef0f5] px-5 py-2">
         {selectedTaskIds.length > 0 && (
           <div className="flex shrink-0 items-center gap-2 whitespace-nowrap">
             <span className="text-xs font-semibold text-[#566078]">
@@ -93,7 +101,7 @@ export function ListView({
                   setSelectedTaskIds([]);
                 }
               }}
-              className="!w-[132px] rounded-lg px-2 py-1.5 text-xs"
+              className="!h-10 !w-[136px] rounded-lg px-2 py-1.5 text-xs"
             >
               <option value="">Set priority</option>
               <option value="urgent">Urgent</option>
@@ -111,7 +119,8 @@ export function ListView({
               onChange={setBulkAssigneeIds}
               aria-label="Bulk assignees"
               placeholder="Assign members"
-              className="w-[150px]"
+              hideSelectedOptions
+              className="!w-[136px]"
             />
             <button
               type="button"
@@ -121,7 +130,7 @@ export function ListView({
                 setBulkAssigneeIds([]);
                 setSelectedTaskIds([]);
               }}
-              className="cursor-pointer rounded-lg bg-[#eef0ff] px-2.5 py-1.5 text-xs font-semibold text-[#5865e9] hover:bg-[#dfe3ff] disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-10 cursor-pointer rounded-lg bg-[#eef0ff] px-2.5 text-xs font-semibold text-[#5865e9] hover:bg-[#dfe3ff] disabled:cursor-not-allowed disabled:opacity-50"
             >
               Apply
             </button>

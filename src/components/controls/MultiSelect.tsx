@@ -14,6 +14,7 @@ export type MultiSelectProps = {
   "aria-label"?: string;
   disabled?: boolean;
   className?: string;
+  hideSelectedOptions?: boolean;
 };
 
 // Provides a keyboard-friendly checkbox dropdown for selecting multiple values.
@@ -25,12 +26,16 @@ export function MultiSelect({
   "aria-label": ariaLabel,
   disabled = false,
   className = "",
+  hideSelectedOptions = false,
 }: MultiSelectProps) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const selectedLabels = options
     .filter((option) => value.includes(option.value))
     .map((option) => option.label);
+  const visibleOptions = hideSelectedOptions
+    ? options.filter((option) => !value.includes(option.value))
+    : options;
 
   useEffect(() => {
     const closeOnOutsideClick = (event: MouseEvent) => {
@@ -63,9 +68,11 @@ export function MultiSelect({
         aria-haspopup="listbox"
         disabled={disabled}
         onClick={() => setOpen((current) => !current)}
-        className="flex min-h-[46px] w-full cursor-pointer items-center justify-between gap-3 rounded-xl border border-[#e5e8f0] bg-white px-3 py-2.5 text-left text-sm text-[#566078] outline-none transition hover:border-[#cfd5e5] focus:ring-2 focus:ring-[#dfe3ff] disabled:cursor-not-allowed disabled:bg-[#f7f8fc]"
+        className="flex h-10 w-full cursor-pointer items-center justify-between gap-2 overflow-hidden rounded-xl border border-[#e5e8f0] bg-white px-3 py-2 text-left text-sm text-[#566078] outline-none transition hover:border-[#cfd5e5] focus:ring-2 focus:ring-[#dfe3ff] disabled:cursor-not-allowed disabled:bg-[#f7f8fc]"
       >
-        <span className={selectedLabels.length ? "truncate" : "text-[#98a0b1]"}>
+        <span
+          className={`min-w-0 flex-1 truncate ${selectedLabels.length ? "" : "text-[#98a0b1]"}`}
+        >
           {selectedLabels.length ? selectedLabels.join(", ") : placeholder}
         </span>
         <ChevronDown
@@ -79,7 +86,7 @@ export function MultiSelect({
           aria-multiselectable="true"
           className="absolute left-0 right-0 top-[calc(100%+6px)] z-20 max-h-52 overflow-y-auto rounded-xl border border-[#e5e8f0] bg-white p-1.5 shadow-popover"
         >
-          {options.map((option) => {
+          {visibleOptions.map((option) => {
             const selected = value.includes(option.value);
             return (
               <button
@@ -99,6 +106,11 @@ export function MultiSelect({
               </button>
             );
           })}
+          {!visibleOptions.length && (
+            <p className="px-2.5 py-2 text-xs text-[#98a0b1]">
+              All selected members are already assigned.
+            </p>
+          )}
         </div>
       )}
     </div>
