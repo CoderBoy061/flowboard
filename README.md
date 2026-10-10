@@ -2,6 +2,12 @@
 
 Flowboard is a small, light-only project-management client for one workspace. It is seeded from typed fixtures and runs without a backend.
 
+## Hosted demo
+
+Try the deployed app at [flowboard-kanban.netlify.app](https://flowboard-kanban.netlify.app/).
+
+The demo stores workspace changes and preferences in the current browser's localStorage, so data is isolated per browser and device.
+
 ## Run locally
 
 Clone the repository and install its dependencies:
