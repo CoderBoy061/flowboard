@@ -32,6 +32,8 @@ function App() {
     isLoading,
     isCreateOpen,
     setIsCreateOpen,
+    createTaskStatusId,
+    openCreateTask,
     isWorkspaceModalOpen,
     setIsWorkspaceModalOpen,
     renameTarget,
@@ -106,7 +108,7 @@ function App() {
               onQueryChange={setQuery}
               onFilterChange={setFilters}
               onResetFilters={resetFilters}
-              onCreateTask={() => setIsCreateOpen(true)}
+              onCreateTask={() => openCreateTask()}
             />
             <ViewSwitcher
               view={preferences.view}
@@ -122,6 +124,7 @@ function App() {
               users={workspace.users}
               onOpenTask={setSelectedTaskId}
               onError={notifyError}
+              onCreateTask={openCreateTask}
             />
           </div>
         </main>
@@ -144,6 +147,7 @@ function App() {
           onCreate={handleCreate}
           statuses={selectedStatuses}
           users={workspace.users}
+          initialStatusId={createTaskStatusId}
         />
       )}
       {isWorkspaceModalOpen && (

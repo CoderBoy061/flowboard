@@ -12,6 +12,7 @@ export function TaskContent({
   users,
   onOpenTask,
   onError,
+  onCreateTask,
 }: {
   loading: boolean;
   selectedList?: Container;
@@ -21,6 +22,7 @@ export function TaskContent({
   users: User[];
   onOpenTask: (taskId: string) => void;
   onError: (error: unknown) => void;
+  onCreateTask: (statusId: string) => void;
 }) {
   if (loading) return <BoardLoadingSkeleton />;
 
@@ -41,6 +43,7 @@ export function TaskContent({
         users={users}
         onOpenTask={onOpenTask}
         onError={onError}
+        onCreateTask={onCreateTask}
       />
     );
   }

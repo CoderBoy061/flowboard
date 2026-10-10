@@ -10,16 +10,18 @@ export function CreateTaskModal({
   onCreate,
   statuses,
   users,
+  initialStatusId,
 }: {
   onClose: () => void;
   onCreate: (input: CreateTaskInput) => void;
   statuses: TaskStatus[];
   users: User[];
+  initialStatusId?: string;
 }) {
   const [form, setForm] = useState<CreateTaskInput>({
     title: "",
     description: "",
-    statusId: statuses[0]?.id ?? "",
+    statusId: initialStatusId ?? statuses[0]?.id ?? "",
     priority: "normal",
     assigneeIds: [],
     dueDate: null,

@@ -77,6 +77,7 @@ export function useFlowboardController() {
   const [toast, setToast] = useState<string | null>(null);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [createTaskStatusId, setCreateTaskStatusId] = useState("");
   const [isWorkspaceModalOpen, setIsWorkspaceModalOpen] = useState(false);
   const [renameTarget, setRenameTarget] = useState<RenameTarget | null>(null);
   const [createTarget, setCreateTarget] = useState<{
@@ -265,6 +266,11 @@ export function useFlowboardController() {
       setPreferences((current) => ({ ...current, selectedListId: listId })),
     [setPreferences],
   );
+  const openCreateTask = useCallback((statusId = "") => {
+    // Opens task creation with an optional Kanban status preselected.
+    setCreateTaskStatusId(statusId);
+    setIsCreateOpen(true);
+  }, []);
   const changeWorkspace = useCallback(
     (workspaceId: string) => {
       dispatch(switchWorkspace(workspaceId));
@@ -390,6 +396,7 @@ export function useFlowboardController() {
     isLoading,
     isCreateOpen,
     setIsCreateOpen,
+    createTaskStatusId,
     isWorkspaceModalOpen,
     setIsWorkspaceModalOpen,
     renameTarget,
@@ -403,6 +410,7 @@ export function useFlowboardController() {
     handleCreateContainer,
     toggleSidebar,
     selectList,
+    openCreateTask,
     changeWorkspace,
     changeUser,
     setViewMode,

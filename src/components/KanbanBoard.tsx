@@ -24,6 +24,7 @@ export function KanbanBoard({
   users,
   onOpenTask,
   onError,
+  onCreateTask,
 }: {
   listId: string;
   tasks: Task[];
@@ -31,6 +32,7 @@ export function KanbanBoard({
   users: User[];
   onOpenTask: (id: string) => void;
   onError: (error: unknown) => void;
+  onCreateTask: (statusId: string) => void;
 }) {
   const dispatch = useDispatch();
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
@@ -87,7 +89,12 @@ export function KanbanBoard({
                     {columnTasks.length}
                   </span>
                 </div>
-                <button className="cursor-pointer rounded-md p-1 text-[#9ba3b3] hover:bg-white">
+                <button
+                  type="button"
+                  aria-label={`Add task to ${status.name}`}
+                  onClick={() => onCreateTask(status.id)}
+                  className="cursor-pointer rounded-md p-1 text-[#9ba3b3] hover:bg-white"
+                >
                   +
                 </button>
               </div>
