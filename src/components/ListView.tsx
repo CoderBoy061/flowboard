@@ -76,9 +76,9 @@ export function ListView({
 
   return (
     <div className="overflow-hidden rounded-2xl border border-[#e7eaf1] bg-white shadow-[0_4px_18px_rgba(35,45,75,0.03)]">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#eef0f5] px-5 py-2">
+      <div className="flex flex-nowrap items-center justify-between gap-3 overflow-x-auto border-b border-[#eef0f5] px-5 py-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {selectedTaskIds.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2 whitespace-nowrap">
             <span className="text-xs font-semibold text-[#566078]">
               {selectedTaskIds.length} selected
             </span>
@@ -93,7 +93,7 @@ export function ListView({
                   setSelectedTaskIds([]);
                 }
               }}
-              className="w-[132px] rounded-lg px-2 py-1.5 text-xs"
+              className="!w-[132px] rounded-lg px-2 py-1.5 text-xs"
             >
               <option value="">Set priority</option>
               <option value="urgent">Urgent</option>
