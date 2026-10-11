@@ -52,7 +52,7 @@ describe("CreateTaskModal", () => {
     }));
   });
 
-  it("shows validation errors for blank and short required fields", async () => {
+  it("requires only a title and status", async () => {
     const user = userEvent.setup();
     render(
       <CreateTaskModal
@@ -72,7 +72,7 @@ describe("CreateTaskModal", () => {
     await user.click(screen.getByRole("button", { name: "Create task" }));
 
     expect(screen.getByText("Title is required.")).toBeTruthy();
-    expect(screen.getByText("Description is required.")).toBeTruthy();
-    expect(screen.getByText("Due date is required.")).toBeTruthy();
+    expect(screen.queryByText("Description is required.")).toBeNull();
+    expect(screen.queryByText("Due date is required.")).toBeNull();
   });
 });

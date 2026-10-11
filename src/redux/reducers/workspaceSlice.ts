@@ -20,6 +20,7 @@ import type {
   Workspace,
   AppNotification,
 } from "../../types";
+import { toIsoDateTime } from "../../utils/taskUtils";
 
 export interface WorkspaceState {
   workspace: Workspace;
@@ -90,7 +91,15 @@ const workspaceSlice = createSlice({
   initialState,
   reducers: {
     hydrateWorkspace(_state, action: PayloadAction<WorkspaceState>) {
-      return { ...action.payload, notifications: action.payload.notifications ?? [] };
+      // Migrate legacy date-only values persisted by earlier client versions.
+      return {
+        ...action.payload,
+        tasks: action.payload.tasks.map((task) => ({
+          ...task,
+          dueDate: toIsoDateTime(task.dueDate),
+        })),
+        notifications: action.payload.notifications ?? [],
+      };
     },
 
     switchUser(state, action: PayloadAction<string>) {

@@ -1,6 +1,17 @@
 import type { Task } from "../types/task";
 import type { TaskFilters } from "../types/filters";
 
+// Date inputs use YYYY-MM-DD, while persisted task data uses an ISO datetime.
+export function toDateInputValue(value: string | null): string {
+  return value?.slice(0, 10) ?? "";
+}
+
+export function toIsoDateTime(value: string | null): string | null {
+  if (!value) return null;
+  if (value.includes("T")) return value;
+  return `${value}T00:00:00.000Z`;
+}
+
 export function filterTasks(
   tasks: Task[],
   query: string,

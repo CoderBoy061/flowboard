@@ -46,39 +46,3 @@
   background-size: 200% 100%;
   animation: shimmer 1.8s linear infinite;
 }
-
-@utility filter-input {
-  width: 100%;
-  border-radius: 0.75rem;
-  border: 1px solid #e5e8f0;
-  background-color: #ffffff;
-  padding: 0.625rem 0.75rem;
-  font-size: 0.875rem;
-  color: #566078;
-  outline: none;
-}
-
-/* Keeps notification scrolling subtle while preserving a clear grab target. */
-.notification-scrollbar {
-  scrollbar-color: #c7ccda transparent;
-  scrollbar-width: thin;
-}
-
-.notification-scrollbar::-webkit-scrollbar {
-  width: 8px;
-}
-
-.notification-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.notification-scrollbar::-webkit-scrollbar-thumb {
-  border: 2px solid transparent;
-  border-radius: 999px;
-  background-clip: padding-box;
-  background-color: #c7ccda;
-}
-
-.notification-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: #aeb6c8;
-}

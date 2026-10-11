@@ -94,15 +94,10 @@ export function CreateTaskModal({
               value={form.description}
               onChange={(event) => update("description", event.target.value)}
               placeholder="Add context for your team..."
-              invalid={showValidation && Boolean(errors.description)}
               className="min-h-24 focus:ring-[#5865e9]"
             />
             <div className="mt-1.5 flex items-start justify-between gap-3">
-              <span className={`text-xs ${showValidation && errors.description ? "font-medium text-[#d94d5d]" : "text-[#98a0b1]"}`}>
-                {showValidation && errors.description
-                  ? errors.description
-                  : "Description is required"}
-              </span>
+              <span className="text-xs text-[#98a0b1]">Optional</span>
               <span className="shrink-0 text-xs text-[#98a0b1]">
                 {form.description.trim().length} characters
               </span>
@@ -142,13 +137,7 @@ export function CreateTaskModal({
                 onChange={(event) =>
                   update("dueDate", event.target.value || null)
                 }
-                invalid={showValidation && Boolean(errors.dueDate)}
               />
-              {showValidation && errors.dueDate && (
-                <span className="mt-1.5 block text-xs font-medium text-[#d94d5d]">
-                  {errors.dueDate}
-                </span>
-              )}
             </FormField>
             <FormField label="Assignees">
               <MultiSelect

@@ -10,6 +10,7 @@ import { Select } from "./controls/Select";
 import { TextArea } from "./controls/TextArea";
 import { TextInput } from "./controls/TextInput";
 import { MAX_TASK_TITLE_LENGTH } from "../utils/taskValidation";
+import { toDateInputValue, toIsoDateTime } from "../utils/taskUtils";
 
 export function TaskDrawer({
   task,
@@ -92,6 +93,7 @@ export function TaskDrawer({
             <TextInput
               id="task-drawer-title"
               aria-label="Task title"
+              autoFocus
               value={draft.title}
               maxLength={MAX_TASK_TITLE_LENGTH}
               onChange={(event) => {
@@ -112,7 +114,6 @@ export function TaskDrawer({
             )}
           </div>
           <button
-            autoFocus
             type="button"
             onClick={onClose}
             className="cursor-pointer rounded-xl p-2 text-[#9ba3b3] hover:bg-[#f5f6fa]"
@@ -241,9 +242,12 @@ export function TaskDrawer({
                 />
                 <TextInput
                   type="date"
-                  value={draft.dueDate ?? ""}
+                  value={toDateInputValue(draft.dueDate)}
                   onChange={(event) =>
-                    save({ ...draft, dueDate: event.target.value || null })
+                    save({
+                      ...draft,
+                      dueDate: toIsoDateTime(event.target.value || null),
+                    })
                   }
                   className="pl-9"
                 />

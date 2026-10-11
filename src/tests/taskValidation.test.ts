@@ -5,18 +5,18 @@ import {
 } from "../utils/taskValidation";
 
 describe("task validation", () => {
-  it("accepts a one-character trimmed description", () => {
+  it("accepts optional description and due date", () => {
     expect(
       validateTaskCreation({
         title: "Task",
-        description: "  A  ",
-        dueDate: "2026-10-29",
+        description: "",
+        dueDate: null,
         statusId: "todo",
       }),
     ).toEqual({});
   });
 
-  it("rejects whitespace-only required fields", () => {
+  it("rejects only the required title and status fields", () => {
     expect(
       validateTaskCreation({
         title: "   ",
@@ -26,8 +26,6 @@ describe("task validation", () => {
       }),
     ).toEqual({
       title: "Title is required.",
-      description: "Description is required.",
-      dueDate: "Due date is required.",
       statusId: "Status is required.",
     });
   });

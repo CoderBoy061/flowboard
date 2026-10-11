@@ -61,7 +61,7 @@ export function NotificationPanel({
             <Check size={14} /> Mark all as read
           </button>
         )}
-        <div className="notification-scrollbar min-h-0 flex-1 space-y-3 overflow-y-auto">
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto [scrollbar-color:#c7ccda_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-thumb]:bg-[#c7ccda] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb:hover]:bg-[#aeb6c8] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-2">
           {notifications.length ? (
             notifications.map((notification) => {
               const actor = users.find(

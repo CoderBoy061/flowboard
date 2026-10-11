@@ -1,9 +1,10 @@
 import type { CreateTaskInput } from "../types";
 
-export const MAX_TASK_TITLE_LENGTH = 150;
+// Matches the assignment's task-title constraint at both the UI and store layers.
+export const MAX_TASK_TITLE_LENGTH = 500;
 
 export type TaskCreationErrors = Partial<
-  Record<"title" | "description" | "dueDate" | "statusId", string>
+  Record<"title" | "statusId", string>
 >;
 
 export function validateTaskCreation(
@@ -11,15 +12,11 @@ export function validateTaskCreation(
 ): TaskCreationErrors {
   const errors: TaskCreationErrors = {};
   const title = input.title.trim();
-  const description = input.description.trim();
 
   if (!title) errors.title = "Title is required.";
   else if (title.length > MAX_TASK_TITLE_LENGTH)
     errors.title = `Title must be ${MAX_TASK_TITLE_LENGTH} characters or fewer.`;
 
-  if (!description) errors.description = "Description is required.";
-
-  if (!input.dueDate?.trim()) errors.dueDate = "Due date is required.";
   if (!input.statusId) errors.statusId = "Status is required.";
 
   return errors;

@@ -33,7 +33,7 @@ import {
   type Task,
   type TaskFilters,
 } from "../types";
-import { filterTasks } from "../utils/taskUtils";
+import { filterTasks, toIsoDateTime } from "../utils/taskUtils";
 import {
   createContainer,
   createDefaultStatuses,
@@ -113,9 +113,20 @@ export function useFlowboardController() {
     setSavedWorkspace(workspace);
   }, [workspace, setSavedWorkspace]);
 
-  const selectedList =
-    accessibleLists.find((item) => item.id === preferences.selectedListId) ??
-    accessibleLists[0];
+  const requestedList = accessibleLists.find(
+    (item) => item.id === preferences.selectedListId,
+  );
+  const selectedList = requestedList ?? accessibleLists[0];
+  const selectedListWasDenied = Boolean(
+    !requestedList &&
+      workspace.containers.some(
+        (container) =>
+          container.id === preferences.selectedListId &&
+          !container.isArchived &&
+          (container.workspaceId ?? "workspace-1") ===
+            workspace.currentWorkspaceId,
+      ),
+  );
   const tasks = useSelector((state: RootState) =>
     selectedList ? selectTasksForList(state, selectedList.id) : emptyTasks,
   );
@@ -159,12 +170,25 @@ export function useFlowboardController() {
   }, [selectedList?.id]);
 
   useEffect(() => {
-    if (!selectedList && accessibleLists.length)
+    if (selectedListWasDenied && accessibleLists.length) {
+      window.setTimeout(() => {
+        setToast(
+          "You do not have permission to access this list. Showing the first accessible list.",
+        );
+        window.setTimeout(() => setToast(null), 3500);
+      }, 0);
       setPreferences((current) => ({
         ...current,
         selectedListId: accessibleLists[0].id,
       }));
-  }, [accessibleLists, selectedList, setPreferences]);
+    }
+  }, [
+    accessibleLists,
+    preferences.selectedListId,
+    selectedListWasDenied,
+    setPreferences,
+    workspace.containers,
+  ]);
 
   useEffect(() => {
     if (!selectedTaskId) return;
@@ -196,7 +220,7 @@ export function useFlowboardController() {
       statusId: input.statusId || listStatuses[0]?.id,
       priority: input.priority,
       assigneeIds: input.assigneeIds,
-      dueDate: input.dueDate,
+      dueDate: toIsoDateTime(input.dueDate),
       position: tasks.length,
       createdAt: now,
       updatedAt: now,
@@ -205,7 +229,6 @@ export function useFlowboardController() {
     try {
       dispatch(addTask(task));
       setIsCreateOpen(false);
-      setSelectedTaskId(task.id);
     } catch (error) {
       notifyError(error);
     }

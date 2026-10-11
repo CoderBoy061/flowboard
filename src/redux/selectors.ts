@@ -35,8 +35,8 @@ export const selectVisibleContainers = createSelector(
         .map((container) => container.id),
     );
 
-    // Keep the complete tree path visible when a member receives direct
-    // access to a nested list through an assigned task.
+    // Keep the complete tree path visible when a member receives a direct
+    // container grant for a nested list.
     workspaceContainers.forEach((container) => {
       if (!visibleIds.has(container.id)) return;
       let parentId = container.parentId;

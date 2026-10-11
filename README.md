@@ -1,132 +1,23 @@
 # Flowboard
 
-Flowboard is a small, light-only project-management client for one workspace. It is seeded from typed fixtures and runs without a backend.
+Flowboard is a client-side task management app built for the supplied frontend take-home assignment. It provides workspace navigation, task management, Kanban and list views, simple permissions, and local persistence without a backend.
 
-## Hosted demo
+## Demo
 
-Try the deployed app at [flowboard-kanban.netlify.app](https://flowboard-kanban.netlify.app/).
-
-The demo stores workspace changes and preferences in the current browser's localStorage, so data is isolated per browser and device.
+[Open the hosted Netlify demo](https://flowboard-kanban.netlify.app/)
 
 ## Run locally
-
-Clone the repository and install its dependencies:
 
 ```bash
 git clone git@github.com:CoderBoy061/flowboard.git
 cd flowboard
 npm install
-```
-
-Start the Vite development server:
-
-```bash
 npm run dev
 ```
 
-The app runs at [http://localhost:3000](http://localhost:3000). Vite is configured with a strict port, so it will report an error instead of silently switching ports if `3000` is already in use.
+The development server runs at [http://localhost:3000](http://localhost:3000). Vite uses a strict port and reports an error if port `3000` is already in use.
 
-Validation: `npm run build` and `npm run test -- --run`.
-
-The detailed PDF verification checklist is kept locally for manual testing and is intentionally not included in the repository.
-
-## Architecture
-
-```text
-App
-├── useFlowboardController → Redux actions + persistence + UI state
-├── Sidebar → visible-container selector → permission service
-├── TopBar → current-user switcher
-├── KanbanBoard → native drag/drop → Redux moveTask
-├── ListView → filtering/sorting/pagination/bulk actions → TaskDrawer
-├── WorkspaceHeader / ViewSwitcher / TaskContent
-└── CreateTaskModal / CreateContainerModal / RenameModal
-
-Redux workspace store
-├── typed fixture data
-├── reducers for container/task mutations
-├── permission middleware (403-style errors)
-└── selectors that filter the tree and tasks
-```
-
-`src/types` contains domain models. `src/data/mockData.ts` contains one workspace, two spaces, two folders, three lists, fifteen tasks, three users, statuses, and sample grants. `src/redux` owns the client data layer. UI pieces live in `src/components`. A complete manual requirement-by-requirement test plan is kept locally in `PDF_TEST_CHECKLIST.md`.
-
-## Technology choices
-
-- React and TypeScript provide typed, component-based UI development.
-- Vite provides the development server and production build pipeline. The development server is fixed to port `3000`.
-- Redux Toolkit was chosen for the client data layer because the assignment needs one predictable source of truth for containers, tasks, statuses, users, grants, notifications, and mutations. It also provides concise reducers, typed actions, and a natural place for permission middleware.
-- Redux selectors keep permission filtering and task access rules outside presentation components. The middleware repeats protected mutation checks so hiding a resource in the UI is not the only enforcement layer.
-- `react-persist-state-hook`, developed and maintained by me, persists the Redux workspace snapshot and UI preferences to localStorage while reducing persistence boilerplate.
-- Tailwind CSS is used through utility classes and a small theme token set for colors, typography, radii, shadows, statuses, and priorities.
-- Native HTML drag-and-drop keeps the dependency footprint small. The trade-off is that browser drag behavior is less customizable than a dedicated DnD library.
-- Vitest and Testing Library cover store, selector, permission, validation, and component behavior.
-
-## Implemented enhancements
-
-- Multiple assignee selection uses the reusable `MultiSelect` control and stores selected user IDs in `assigneeIds`.
-- List view pagination displays three tasks per page and keeps sorting before pagination.
-- List view bulk actions update priority or assignees for selected tasks through one Redux mutation.
-- Subtasks use `parentTaskId` and `isCompleted`; they are created and completed from the task drawer while remaining grouped under their parent.
-- Tasks and containers use soft archive behavior. Administrators can open the archive panel and restore archived records; restoring a container restores its descendants.
-- Bulk mutations capture task snapshots and dispatch `rollbackTasks` when a protected mutation fails. The local store is synchronous, so this provides rollback safety for local errors rather than simulating a network request.
-- `Pagination`, `MultiSelect`, `Select`, `TextInput`, and `TextArea` are reusable typed controls/components.
-
-## Data model
-
-Containers are ordered nodes with `space`, `folder`, or `list` type and a `parentId`. Containers support `public` or `private` visibility; newly created containers are private by default. Lists own their status sets. Tasks belong to one list, reference a list status, and have title, description, priority, assignees, due date, timestamps, and position. Archive is used as the soft-delete behavior for tasks and containers; archived records remain in the client store but are excluded from selectors.
-
-## Requirement mapping
-
-- The sidebar renders the workspace tree and selects the active list.
-- `KanbanBoard` supports status changes, same-column ordering, visible drag feedback, and empty columns.
-- `ListView` supports dense task inspection and sorting by due date or priority.
-- `TaskDrawer` supports task editing, moving between lists, and admin-only archive confirmation.
-- `permissionService`, selectors, and `permissionMiddleware` enforce the PDF's container-grant model. Members can see and edit all tasks in lists they can access; assignment does not create permission grants.
-- `LoadingSkeleton`, toast handling, focus states, overlay dismissal, and confirmation dialogs cover the required interaction feedback.
-- `NotificationPanel` is an optional activity enhancement. It does not participate in permission decisions.
-
-Task creation trims title, description, and due date. Title is limited to 150 characters by the product UI; description is required but may be one character. These are product validation choices in addition to the assignment's domain model.
-
-## PDF MVP verification checklist
-
-- [x] Typed workspace, container, task, status, user, and grant models
-- [x] Seed fixtures: one workspace, two spaces, two folders, three lists, fifteen tasks, three users, and sample grants
-- [x] Workspace tree with space, folder, and list navigation
-- [x] Container create, rename, archive, and sibling reorder
-- [x] Task create, read, update, archive, status change, list move, and position reorder
-- [x] Per-list To Do, In Progress, and Done statuses
-- [x] Kanban board with drag preview, drop highlight, empty columns, and status-column task creation
-- [x] List view with task fields and due-date/priority sorting
-- [x] Task detail drawer with editing, Escape, overlay close, and delete confirmation
-- [x] Alice, Bob, and Carol user switcher
-- [x] Public/private containers, allow/deny grants, admin bypass, and inherited access
-- [x] Store/selectors/middleware permission enforcement with consistent errors
-- [x] Tailwind-only light visual system with theme tokens
-- [x] Loading shimmer, empty states, error toast, hover/focus/active feedback
-- [x] LocalStorage persistence through `react-persist-state-hook`
-- [x] Unit/store tests and a Testing Library component test
-- [x] README architecture, data model, permission, trade-off, and AI usage documentation
-
-The PDF's optional stretch goals are intentionally limited: client-side search and an activity notification panel are included. Pagination, subtasks, rollback safety, bulk updates, and archive restoration are also implemented as local enhancements. Storybook, deployment, and backend/API integration remain outside this client-only project.
-
-## Permissions
-
-The active user is Alice (admin), Bob, or Carol. Admins bypass resource restrictions. Public spaces are visible to members unless denied; private containers require an explicit allow grant, and members inherit access from an allowed ancestor. A direct deny takes precedence. Selectors filter inaccessible tree paths and tasks, while Redux middleware repeats the check for protected mutations, so UI hiding is not the security boundary. A backend version could extend grants with teams and inherited policy evaluation.
-
-## Persistence and trade-offs
-
-`react-persist-state-hook`, a package developed and maintained by me (Debabrata Basak), persists the complete workspace Redux snapshot plus selected list, board/list view, and sidebar collapse state in localStorage. I used it to reduce the persistence boilerplate while keeping the Redux mutation flow explicit and easy to inspect. Fresh browsers receive the typed seed fixtures; subsequent mutations stay isolated to that browser and survive refreshes.
-
-Native HTML drag/drop is used for task cards. Tailwind utility classes are used in JSX, with a white/light visual system and no custom layout CSS.
-
-This pass focuses on hierarchy navigation, container CRUD and sibling reorder, board/list views, list sorting and pagination, bulk task actions, task create/read/update/archive/restore, subtasks, moving tasks between lists, status changes, drag/drop, task drawer, user switching, selectors, middleware, persistence, and responsive layout.
-
-## Tests
-
-`src/tests/permissionService.test.ts` covers admin/member grants, direct denies, and inaccessible resources. `src/tests/selectors.test.ts` covers tree-path visibility and task access by granted list. `src/tests/workspaceSlice.test.ts` covers permission-independent task assignment and role-aware notifications. `src/tests/CreateTaskModal.test.tsx` is a Testing Library component test for task creation.
-
-The test suite also covers required-field trimming, title limits, individual notification read state, status movement, and soft archive behavior. Run all checks with:
+Run the checks with:
 
 ```bash
 npm run test -- --run
@@ -134,10 +25,190 @@ npm run build
 npm run lint
 ```
 
-## Trade-offs and next steps
+Generate a coverage report and open it in a browser:
 
-This is a client-only single-tenant demo, so localStorage is not a security boundary and changes are isolated per browser. Workspace switching, container management, pagination, bulk actions, subtasks, and archive restoration go beyond the assignment's minimum because they make the client demo easier to exercise. Rollback handling is limited to synchronous local mutation failures; a future API adapter would need request IDs, pending state, retry behavior, and server-side rollback conflict handling. Next week I would add server-side authorization, API synchronization, richer keyboard/accessibility coverage, and a deployment workflow.
+```bash
+npm test -- --coverage --run
+```
+
+Then open the generated report in a browser:
+
+- In VS Code: open the generated file at `coverage/index.html` from the Explorer, then right-click and choose “Open in Browser” or “Open with Default Browser”.
+- In a terminal: run `xdg-open coverage/index.html` on Linux.
+
+This produces a local HTML coverage report showing statements, branches, functions, and lines covered.
+
+## What is implemented
+
+- Workspace → space → folder → list hierarchy with create, rename, archive, restore, and sibling reordering.
+- Task create, edit, archive, restore, list movement, status changes, and Kanban reordering.
+- Kanban and dense list views for the selected list.
+- Per-list statuses: To Do, In Progress, and Done.
+- Search, filtering, due-date/priority sorting, pagination, bulk priority/assignee updates, and subtasks.
+- Multiple assignees with initials on cards and full names in task details.
+- Alice (admin), Bob (member), and Carol (member) user switching.
+- Container-level allow/deny permissions with admin bypass and permission-aware selectors.
+- Activity notifications with read/unread state.
+- Loading skeletons, empty states, error toasts, drag/drop feedback, confirmation dialogs, and reusable form controls.
+- Netlify deployment and SPA routing support through `public/_redirects`.
+
+## Architecture
+
+```text
+App
+├── useFlowboardController
+│   ├── Redux actions and selectors
+│   ├── localStorage persistence
+│   └── view, modal, filter, and notification state
+├── Sidebar / TopBar
+│   └── permission-filtered navigation and user switching
+├── TaskContent
+│   ├── KanbanBoard → drag/drop → Redux moveTask
+│   └── ListView → search, sort, pagination, bulk updates
+└── TaskDrawer / modals / reusable controls
+
+Redux workspace store
+├── typed fixture data
+├── task, container, workspace, and notification reducers
+├── permission middleware for protected mutations
+└── selectors for visible containers and tasks
+```
+
+## Main technical decisions
+
+### React, TypeScript, and Vite
+
+React fits the component-based UI, TypeScript keeps the domain model explicit, and Vite provides a fast development/build workflow with minimal configuration.
+
+### Redux Toolkit
+
+I chose Redux Toolkit because the app has related entities—workspaces, containers, tasks, statuses, users, grants, and notifications—that must stay consistent when users switch accounts or move tasks. A single typed store also gives permission checks and mutations one predictable location.
+
+### Permission service and middleware
+
+Permission checks are not limited to hiding UI. `permissionService.ts` contains the access rules, selectors filter the visible tree and tasks, and `permissionMiddleware.ts` protects mutations with consistent `{ error: { code, message } }` errors.
+
+The model is intentionally simple:
+
+```ts
+{ resourceId, userId, mode: "allow" | "deny" }
+```
+
+Admins bypass restrictions. Members can access public containers unless denied, while private containers require an explicit allow grant. A future backend could add server-side authorization, teams, and more advanced policies.
+
+Task assignment is separate from permission: assigning Bob to a task does not grant access to its list. A direct deny grant always wins, so Bob cannot view or mutate a denied list even when assigned to a task inside it.
+
+### Local persistence
+
+There is no backend in the assignment, so the Redux workspace snapshot and UI preferences are stored in localStorage. I use `react-persist-state-hook`, a package developed and maintained by me (Debabrata Basak), to reduce persistence boilerplate while keeping Redux as the source of truth.
+
+This is useful for the demo, but localStorage is not a security boundary and data is isolated to the current browser/device.
+
+### Tailwind CSS
+
+Tailwind utility classes keep layout and component styling close to the JSX. Shared theme tokens in `src/index.css` provide consistent colors, typography, radii, shadows, status colors, and priority colors.
+
+### Native drag-and-drop
+
+I used native HTML drag-and-drop instead of adding a DnD library to keep the dependency footprint small. This supports status changes, same-column ordering, drag previews, and drop highlights. The trade-off is that native drag behavior is less customizable and needs additional accessibility work for keyboard-only users.
+
+## Data model
+
+- A workspace contains spaces.
+- Spaces contain folders.
+- Folders contain lists.
+- Lists own their status sets and contain tasks.
+- Tasks store `listId`, `statusId`, title, description, priority, `assigneeIds`, due date, position, timestamps, and archive state.
+- Containers and tasks use soft archive instead of permanent deletion.
+- `parentTaskId` supports one level of subtasks.
+
+Seed data contains one workspace, two spaces, two folders, three lists, fifteen tasks, three users, statuses, and sample permission grants.
+
+## PDF requirement status
+
+The required MVP is covered, including the PDF task-field rules: titles allow up to 500 characters, and description and due date are optional. Due dates are stored as ISO datetimes.
+
+- Typed models and seed fixtures.
+- Container hierarchy, CRUD, archive behavior, and sibling ordering.
+- Task CRUD, list movement, status changes, and position ordering.
+- Kanban and list views with the required task fields.
+- Alice, Bob, and Carol with permission-aware tree/task access.
+- Store-level permission enforcement and consistent errors.
+- Loading, empty, error, feedback, and drag/drop states.
+- Local client data layer, tests, and README documentation.
+
+The detailed manual PDF checklist is kept locally and is intentionally not committed to the repository.
+
+## Stretch goals attempted
+
+The assignment recommends choosing at most two stretch goals. I selected these as the primary stretch goals:
+
+1. **Client-side search** — searches task titles and descriptions.
+2. **Activity feed** — shows role-aware task activity and read/unread notifications.
+
+Additional local enhancements were also implemented: pagination, subtasks, bulk updates, archive restoration, and rollback safety for synchronous local mutations. Storybook and backend/API integration were intentionally not added because they were outside the client-only assignment scope.
+
+## What could be improved
+
+These are deliberate limits of this submission, not missing PDF MVP requirements:
+
+- Replace localStorage with a backend and server-side authorization.
+- Add API loading, retry, request IDs, and real optimistic rollback for network failures.
+- Add keyboard-accessible drag-and-drop or use a dedicated DnD library.
+- Add a full focus trap and focus restoration for drawers and dialogs.
+- Add Storybook if the component library grows or needs isolated visual review.
+- Add more end-to-end tests for drag/drop, user switching, and permission-denied mutations.
+
+## Trade-offs and week 2 plan
+
+This submission intentionally keeps the scope narrow to the client-only assignment. The main cuts were:
+
+- No backend or real authentication; the app uses localStorage and a local Redux snapshot instead.
+- No external drag-and-drop library; native HTML drag-and-drop keeps dependencies smaller and matches the assignment constraint.
+- No Storybook, no API layer, and no server-side authorization or persistence pipeline.
+- No broad end-to-end suite beyond the current unit/component validation focused on the PDF requirements.
+
+If I had a second week, the next improvements would be:
+
+1. Add a real backend with CRUD APIs and server-side authorization.
+2. Add keyboard-accessible drag-and-drop and stronger focus management for drawers and dialogs.
+3. Add end-to-end tests for drag/drop flows, user switching, and permission-denied mutations.
+4. Add a richer loading/error model with request IDs, retry handling, and real optimistic rollback.
+5. Improve accessibility and visual polish for keyboard and screen-reader users.
+
+## Tests
+
+The test suite includes permission, selector, store, validation, and component coverage for:
+
+- Permission filtering and denied access.
+- A structured `FORBIDDEN` error for a denied store mutation.
+- Selector visibility for containers and tasks.
+- Store task mutations, movement, archive behavior, and notifications.
+- Task creation and validation through Testing Library.
+- Required-field trimming and title limits.
 
 ## AI usage log
 
-AI assistance was used for the component split, typed Redux actions/selectors, permission middleware, and initial UI composition. The implementation was reviewed against the supplied assignment and corrected to preserve the existing fixture shape, Tailwind-only styling, and store-layer permission enforcement.
+AI tools used in this project included VS Code Copilot and related AI-assisted coding support during development.
+
+Where AI helped:
+
+- Breaking the UI into focused React components.
+- Drafting typed Redux models, selectors, reducers, and middleware.
+- Proposing permission logic and access patterns consistent with the assignment.
+- Skeletonizing tests and helping validate edge cases around task creation and validation.
+- Speeding up iteration on README structure and architecture documentation.
+
+Where I corrected or tightened the AI output:
+
+- The permission model was corrected to match the PDF: task assignment does not grant container access; container grants and deny rules control visibility and mutation rights.
+- The direct deny rule was enforced as the strongest rule, so denied lists remain inaccessible even when assigned to a task inside them.
+- The app was kept client-only; AI suggestions that implied a backend or server-side auth layer were removed.
+- Tailwind-only styling was preserved, and inline `style=` layout decisions were avoided.
+- Unused or out-of-scope features, such as extra access-management UI and a non-required dark mode, were removed during review.
+
+The final implementation was reviewed against the supplied assignment PDF and the live code/tests before being kept in the final submission.
+
+## DnD styling note
+
+The app uses native HTML drag-and-drop. No inline `style=` layout or theme styles are used; drag preview and drop states are represented with Tailwind classes. The only styling trade-off is the browser-controlled native drag preview.

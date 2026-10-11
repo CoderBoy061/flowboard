@@ -38,19 +38,28 @@ export function KanbanBoard({
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
   const [dragOverStatusId, setDragOverStatusId] = useState<string | null>(null);
   const [dragOverTaskId, setDragOverTaskId] = useState<string | null>(null);
+
+  const clearDragState = () => {
+    setDraggingTaskId(null);
+    setDragOverStatusId(null);
+    setDragOverTaskId(null);
+  };
+
   // Persists the dragged task's status and position through the Redux mutation.
   const onDrop = (event: React.DragEvent, statusId: string, position: number) => {
     event.preventDefault();
     event.stopPropagation();
     const taskId = event.dataTransfer.getData("taskId");
+    if (!taskId) {
+      clearDragState();
+      return;
+    }
     try {
       dispatch(moveTask({ taskId, statusId, position }));
     } catch (error) {
       onError(error);
     } finally {
-      setDraggingTaskId(null);
-      setDragOverStatusId(null);
-      setDragOverTaskId(null);
+      clearDragState();
     }
   };
   return (
@@ -67,8 +76,22 @@ export function KanbanBoard({
           return (
             <section
               key={status.id}
-              onDragOver={(event) => { event.preventDefault(); event.dataTransfer.dropEffect = "move"; setDragOverStatusId(status.id); }}
-              onDragLeave={() => setDragOverStatusId(null)}
+              onDragEnter={(event) => {
+                event.preventDefault();
+                setDragOverStatusId(status.id);
+              }}
+              onDragOver={(event) => {
+                event.preventDefault();
+                event.dataTransfer.dropEffect = "move";
+                setDragOverStatusId(status.id);
+              }}
+              onDragLeave={(event) => {
+                const nextTarget = event.relatedTarget as Node | null;
+                if (!nextTarget || !event.currentTarget.contains(nextTarget)) {
+                  setDragOverStatusId(null);
+                  setDragOverTaskId(null);
+                }
+              }}
               onDrop={(event) =>
                 onDrop(
                   event,
@@ -99,7 +122,15 @@ export function KanbanBoard({
                   +
                 </button>
               </div>
-              <div className="relative min-h-0 flex-1 overflow-y-auto pr-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div
+                className="relative min-h-0 flex-1 overflow-y-auto pr-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  event.dataTransfer.dropEffect = "move";
+                  setDragOverStatusId(status.id);
+                }}
+                onDrop={(event) => onDrop(event, status.id, columnTasks.length)}
+              >
                 {draggingTaskId && dragOverStatusId === status.id ? (
                   <div className="absolute inset-0 flex items-center justify-center rounded-xl border-2 border-dashed border-brand-500 bg-brand-50/80 text-sm font-semibold text-brand-500">
                     Drop here
@@ -110,7 +141,12 @@ export function KanbanBoard({
                   <article
                     key={task.id}
                     draggable
-                    onDragStart={(event) => { event.dataTransfer.setData("taskId", task.id); event.dataTransfer.effectAllowed = "move"; setDraggingTaskId(task.id); }}
+                    onDragStart={(event) => {
+                      event.dataTransfer.setData("taskId", task.id);
+                      event.dataTransfer.setData("text/plain", task.id);
+                      event.dataTransfer.effectAllowed = "move";
+                      setDraggingTaskId(task.id);
+                    }}
                     onDragOver={(event) => {
                       event.preventDefault();
                       event.stopPropagation();
@@ -126,7 +162,7 @@ export function KanbanBoard({
                           : index;
                       onDrop(event, status.id, position);
                     }}
-                    onDragEnd={() => { setDraggingTaskId(null); setDragOverStatusId(null); setDragOverTaskId(null); }}
+                    onDragEnd={clearDragState}
                     onClick={() => onOpenTask(task.id)}
                     className={`group cursor-grab rounded-control border border-[#e5e8f0] bg-surface p-4 shadow-card transition hover:-translate-y-0.5 hover:border-[#cfd4ff] hover:shadow-md active:cursor-grabbing ${draggingTaskId === task.id ? "scale-[1.02] opacity-30" : ""} ${dragOverTaskId === task.id && draggingTaskId !== task.id ? "border-brand-500 ring-2 ring-brand-500/20" : ""}`}
                   >

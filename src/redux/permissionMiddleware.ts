@@ -109,9 +109,14 @@ export const permissionMiddleware: Middleware =
     if (typedAction.type === "workspace/rollbackTasks") return next(action);
     if (typedAction.type === "workspace/bulkUpdateTasks") {
       const taskIds = payload?.taskIds ?? [];
-      const selectedTasks = state.tasks.filter((task) => taskIds.includes(task.id));
+      const selectedTasks = state.tasks.filter((task) =>
+        taskIds.includes(task.id),
+      );
       if (!taskIds.length || selectedTasks.length !== taskIds.length) {
-        throw createStoreError("NOT_FOUND", "One or more selected tasks could not be found.");
+        throw createStoreError(
+          "NOT_FOUND",
+          "One or more selected tasks could not be found.",
+        );
       }
       if (
         selectedTasks.some(
@@ -146,7 +151,8 @@ export const permissionMiddleware: Middleware =
         !newContainer.type ||
         (expectedParentType && parent?.type !== expectedParentType) ||
         (!expectedParentType && newContainer.parentId) ||
-        (parent && (parent.workspaceId ?? "workspace-1") !== state.currentWorkspaceId)
+        (parent &&
+          (parent.workspaceId ?? "workspace-1") !== state.currentWorkspaceId)
       ) {
         throw createStoreError(
           "VALIDATION",
@@ -172,7 +178,8 @@ export const permissionMiddleware: Middleware =
         !updatedContainer.type ||
         (expectedParentType && parent?.type !== expectedParentType) ||
         (!expectedParentType && updatedContainer.parentId) ||
-        (parent && (parent.workspaceId ?? "workspace-1") !== state.currentWorkspaceId)
+        (parent &&
+          (parent.workspaceId ?? "workspace-1") !== state.currentWorkspaceId)
       ) {
         throw createStoreError(
           "VALIDATION",
@@ -203,18 +210,14 @@ export const permissionMiddleware: Middleware =
       const statuses = state.statusesByList[newTask.listId ?? ""] ?? [];
       const validationErrors = validateTaskCreation({
         title: newTask.title ?? "",
-        description: (typedAction.payload as { description?: string }).description ?? "",
-        dueDate: (typedAction.payload as { dueDate?: string | null }).dueDate ?? null,
+        description:
+          (typedAction.payload as { description?: string }).description ?? "",
+        dueDate:
+          (typedAction.payload as { dueDate?: string | null }).dueDate ?? null,
         statusId: newTask.statusId ?? "",
       });
-      if (validationErrors.title || validationErrors.description || validationErrors.dueDate) {
-        throw createStoreError(
-          "VALIDATION",
-          validationErrors.title ??
-            validationErrors.description ??
-            validationErrors.dueDate ??
-            "Task details are invalid.",
-        );
+      if (validationErrors.title) {
+        throw createStoreError("VALIDATION", validationErrors.title);
       }
       if (
         !newTask.listId ||
