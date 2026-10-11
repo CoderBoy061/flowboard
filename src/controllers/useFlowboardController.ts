@@ -241,7 +241,7 @@ export function useFlowboardController() {
     try {
       dispatch(addTask(task));
       setIsCreateOpen(false);
-      showToast("Task created.");
+      showToast("Task created successfully.");
     } catch (error) {
       notifyError(error);
     }

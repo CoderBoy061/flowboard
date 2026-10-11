@@ -14,25 +14,35 @@ describe("CreateTaskModal", () => {
       <CreateTaskModal
         onClose={vi.fn()}
         onCreate={onCreate}
-        statuses={[{
-          id: "status-todo",
-          name: "To Do",
-          category: "todo",
-          color: "#64748b",
-          position: 0,
-        }]}
-        users={[{
-          id: "user-bob",
-          name: "Bob Smith",
-          email: "bob@example.com",
-          role: "member",
-        }]}
+        statuses={[
+          {
+            id: "status-todo",
+            name: "To Do",
+            category: "todo",
+            color: "#64748b",
+            position: 0,
+          },
+        ]}
+        users={[
+          {
+            id: "user-bob",
+            name: "Bob Smith",
+            email: "bob@example.com",
+            role: "member",
+          },
+        ]}
       />,
     );
 
-    await user.type(screen.getByPlaceholderText("What needs to be done?"), "Document permissions");
+    await user.type(
+      screen.getByPlaceholderText("What needs to be done?"),
+      "Document permissions",
+    );
     const description = "A";
-    await user.type(screen.getByPlaceholderText("Add context for your team..."), description);
+    await user.type(
+      screen.getByPlaceholderText("Add context for your team..."),
+      description,
+    );
     const selects = screen.getAllByRole("combobox");
     await user.selectOptions(selects[1], "urgent");
     await user.click(screen.getByRole("button", { name: "Assignees" }));
@@ -42,14 +52,16 @@ describe("CreateTaskModal", () => {
     });
     await user.click(screen.getByRole("button", { name: "Create task" }));
 
-    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({
-      title: "Document permissions",
-      description,
-      statusId: "status-todo",
-      priority: "urgent",
-      assigneeIds: ["user-bob"],
-      dueDate: "2026-10-29",
-    }));
+    expect(onCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Document permissions",
+        description,
+        statusId: "status-todo",
+        priority: "urgent",
+        assigneeIds: ["user-bob"],
+        dueDate: "2026-10-29",
+      }),
+    );
   });
 
   it("requires only a title and status", async () => {
@@ -58,13 +70,15 @@ describe("CreateTaskModal", () => {
       <CreateTaskModal
         onClose={vi.fn()}
         onCreate={vi.fn()}
-        statuses={[{
-          id: "status-todo",
-          name: "To Do",
-          category: "todo",
-          color: "#64748b",
-          position: 0,
-        }]}
+        statuses={[
+          {
+            id: "status-todo",
+            name: "To Do",
+            category: "todo",
+            color: "#64748b",
+            position: 0,
+          },
+        ]}
         users={[]}
       />,
     );
@@ -74,5 +88,48 @@ describe("CreateTaskModal", () => {
     expect(screen.getByText("Title is required.")).toBeTruthy();
     expect(screen.queryByText("Description is required.")).toBeNull();
     expect(screen.queryByText("Due date is required.")).toBeNull();
+  });
+
+  it("creates a To Do task when statuses load after the modal opens", async () => {
+    const user = userEvent.setup();
+    const onCreate = vi.fn();
+    const statuses = [
+      {
+        id: "status-todo",
+        name: "To Do",
+        category: "todo" as const,
+        color: "#64748b",
+        position: 0,
+      },
+    ];
+    const { rerender } = render(
+      <CreateTaskModal
+        onClose={vi.fn()}
+        onCreate={onCreate}
+        statuses={[]}
+        users={[]}
+      />,
+    );
+
+    rerender(
+      <CreateTaskModal
+        onClose={vi.fn()}
+        onCreate={onCreate}
+        statuses={statuses}
+        users={[]}
+      />,
+    );
+    await user.type(
+      screen.getByPlaceholderText("What needs to be done?"),
+      "To Do task",
+    );
+    await user.click(screen.getByRole("button", { name: "Create task" }));
+
+    expect(onCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "To Do task",
+        statusId: "status-todo",
+      }),
+    );
   });
 });

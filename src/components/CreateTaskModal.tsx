@@ -46,9 +46,19 @@ export function CreateTaskModal({
         onSubmit={(event) => {
           event.preventDefault();
           setShowValidation(true);
-          if (Object.keys(errors).length === 0) {
+          const statusId = statuses.some(
+            (status) => status.id === form.statusId,
+          )
+            ? form.statusId
+            : (statuses.find((status) => status.id === initialStatusId)?.id ??
+              statuses[0]?.id ??
+              "");
+          const taskInput = { ...form, statusId };
+          const taskErrors = validateTaskCreation(taskInput);
+
+          if (Object.keys(taskErrors).length === 0) {
             onCreate({
-              ...form,
+              ...taskInput,
               title: form.title.trim(),
               description: form.description.trim(),
               dueDate: form.dueDate?.trim() || null,
@@ -143,7 +153,10 @@ export function CreateTaskModal({
               <MultiSelect
                 value={form.assigneeIds}
                 onChange={(assigneeIds) => update("assigneeIds", assigneeIds)}
-                options={users.map((user) => ({ value: user.id, label: user.name }))}
+                options={users.map((user) => ({
+                  value: user.id,
+                  label: user.name,
+                }))}
                 aria-label="Assignees"
                 placeholder="Unassigned"
               />
