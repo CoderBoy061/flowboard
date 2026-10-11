@@ -124,20 +124,20 @@ I used native HTML drag-and-drop instead of adding a DnD library to keep the dep
 
 Seed data contains one workspace, two spaces, two folders, three lists, fifteen tasks, three users, statuses, and sample permission grants.
 
-## PDF requirement status
+## Assignment compliance
 
-The required MVP is covered, including the PDF task-field rules: titles allow up to 500 characters, and description and due date are optional. Due dates are stored as ISO datetimes.
+The required MVP is covered and validated against the supplied assignment brief. Task titles support up to 500 characters, description and due date are optional, and due dates are stored as ISO datetimes.
 
 - Typed models and seed fixtures.
-- Container hierarchy, CRUD, archive behavior, and sibling ordering.
+- Workspace and container hierarchy, CRUD, archive behavior, and sibling ordering.
 - Task CRUD, list movement, status changes, and position ordering.
 - Kanban and list views with the required task fields.
-- Alice, Bob, and Carol with permission-aware tree/task access.
-- Store-level permission enforcement and consistent errors.
+- Alice, Bob, and Carol with permission-aware access rules.
+- Store-level permission enforcement and consistent error handling.
 - Loading, empty, error, feedback, and drag/drop states.
-- Local client data layer, tests, and README documentation.
+- Local client data layer, tests, and project documentation.
 
-The detailed manual PDF checklist is kept locally and is intentionally not committed to the repository.
+This checklist is intentionally concise and kept in the project documentation to confirm the assignment requirements were addressed without exposing the local PDF review sheet.
 
 ## Stretch goals attempted
 
