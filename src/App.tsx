@@ -52,6 +52,7 @@ function App() {
     handleRename,
     handleCreateContainer,
     toggleSidebar,
+    notifyError,
     selectList,
     changeWorkspace,
     changeUser,
@@ -70,7 +71,7 @@ function App() {
     openCreateChild,
     deleteContainerFromSidebar,
     reorderContainerSiblings,
-    notifyError,
+    showToast,
   } = controller;
 
   const selectedStatuses =
@@ -135,6 +136,7 @@ function App() {
               onError={notifyError}
               onCreateTask={openCreateTask}
               onBulkUpdate={handleBulkUpdate}
+              onToast={showToast}
             />
           </div>
         </main>
@@ -152,6 +154,7 @@ function App() {
           onCreateSubtask={controller.handleCreateSubtask}
           onToggleSubtask={controller.handleToggleSubtask}
           canDelete={canDelete}
+          onToast={showToast}
         />
       )}
       {isCreateOpen && (

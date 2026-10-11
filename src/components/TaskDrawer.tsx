@@ -1,7 +1,11 @@
 import { CalendarDays, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { deleteTask, moveTask, updateTask } from "../redux/reducers/workspaceSlice";
+import {
+  deleteTask,
+  moveTask,
+  updateTask,
+} from "../redux/reducers/workspaceSlice";
 import type { Container, Task, TaskStatus, User } from "../types";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { FormField } from "./FormField";
@@ -24,6 +28,7 @@ export function TaskDrawer({
   onCreateSubtask,
   onToggleSubtask,
   canDelete,
+  onToast,
 }: {
   task: Task;
   statuses: TaskStatus[];
@@ -36,16 +41,18 @@ export function TaskDrawer({
   onCreateSubtask: (parentTaskId: string, title: string) => void;
   onToggleSubtask: (task: Task) => void;
   canDelete: boolean;
+  onToast?: (message: string) => void;
 }) {
   const dispatch = useDispatch();
   const [draft, setDraft] = useState(task);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [titleError, setTitleError] = useState(false);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
-  const save = (next: Task) => {
+  const save = (next: Task, successMessage?: string) => {
     setDraft(next);
     try {
       dispatch(updateTask({ ...next, updatedAt: new Date().toISOString() }));
+      if (successMessage) onToast?.(successMessage);
     } catch (error) {
       onError(error);
     }
@@ -63,10 +70,19 @@ export function TaskDrawer({
     if (listId === draft.listId) return;
     const nextStatuses = statusesByList[listId] ?? [];
     const nextStatusId = nextStatuses[0]?.id;
+    const targetList = lists.find((item) => item.id === listId);
     if (!nextStatusId) return;
     try {
-      dispatch(moveTask({ taskId: task.id, listId, statusId: nextStatusId, position: 0 }));
+      dispatch(
+        moveTask({
+          taskId: task.id,
+          listId,
+          statusId: nextStatusId,
+          position: 0,
+        }),
+      );
       setDraft({ ...draft, listId, statusId: nextStatusId });
+      onToast?.(`Task moved to ${targetList?.name ?? "new list"}.`);
     } catch (error) {
       onError(error);
     }
@@ -75,6 +91,7 @@ export function TaskDrawer({
     try {
       dispatch(deleteTask(task.id));
       onClose();
+      onToast?.("Task deleted.");
     } catch (error) {
       onError(error);
     }
@@ -84,7 +101,12 @@ export function TaskDrawer({
       className="fixed inset-0 z-30 bg-[#172033]/20"
       onMouseDown={(event) => event.target === event.currentTarget && onClose()}
     >
-      <aside role="dialog" aria-modal="true" aria-labelledby="task-drawer-title" className="absolute right-0 top-0 h-full w-full max-w-[460px] overflow-y-auto bg-white p-6 shadow-2xl sm:p-8">
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="task-drawer-title"
+        className="absolute right-0 top-0 h-full w-full max-w-[460px] overflow-y-auto bg-white p-6 shadow-2xl sm:p-8"
+      >
         <div className="mb-8 flex items-start justify-between">
           <div>
             <span className="text-xs font-bold uppercase tracking-[0.15em] text-[#5865e9]">
@@ -109,7 +131,8 @@ export function TaskDrawer({
             />
             {titleError && (
               <p className="mt-1 text-xs font-medium text-[#d94d5d]">
-                Title is required and must be {MAX_TASK_TITLE_LENGTH} characters or fewer.
+                Title is required and must be {MAX_TASK_TITLE_LENGTH} characters
+                or fewer.
               </p>
             )}
           </div>
@@ -136,9 +159,15 @@ export function TaskDrawer({
               className="min-h-[120px]"
             />
           </div>
-          <section aria-labelledby="subtasks-heading" className="rounded-xl border border-[#eef0f5] p-4">
+          <section
+            aria-labelledby="subtasks-heading"
+            className="rounded-xl border border-[#eef0f5] p-4"
+          >
             <div className="mb-3 flex items-center justify-between">
-              <h3 id="subtasks-heading" className="text-sm font-bold text-[#273149]">
+              <h3
+                id="subtasks-heading"
+                className="text-sm font-bold text-[#273149]"
+              >
                 Subtasks
               </h3>
               <span className="rounded-md bg-[#f5f6fa] px-1.5 py-0.5 text-xs font-semibold text-[#8790a3]">
@@ -147,14 +176,21 @@ export function TaskDrawer({
             </div>
             <div className="space-y-2">
               {subtasks.map((subtask) => (
-                <label key={subtask.id} className="flex cursor-pointer items-center gap-2 text-sm text-[#566078]">
+                <label
+                  key={subtask.id}
+                  className="flex cursor-pointer items-center gap-2 text-sm text-[#566078]"
+                >
                   <input
                     type="checkbox"
                     checked={Boolean(subtask.isCompleted)}
                     onChange={() => onToggleSubtask(subtask)}
                     className="h-4 w-4 cursor-pointer accent-[#5865e9]"
                   />
-                  <span className={subtask.isCompleted ? "text-[#98a0b1] line-through" : ""}>
+                  <span
+                    className={
+                      subtask.isCompleted ? "text-[#98a0b1] line-through" : ""
+                    }
+                  >
                     {subtask.title}
                   </span>
                 </label>
@@ -205,9 +241,19 @@ export function TaskDrawer({
             <FormField label="Status">
               <Select
                 value={draft.statusId}
-                onChange={(event) =>
-                  save({ ...draft, statusId: event.target.value })
-                }
+                onChange={(event) => {
+                  const nextStatusId = event.target.value;
+                  if (!nextStatusId || nextStatusId === draft.statusId) return;
+                  const nextStatus = statuses.find(
+                    (status) => status.id === nextStatusId,
+                  );
+                  save(
+                    { ...draft, statusId: nextStatusId },
+                    nextStatus
+                      ? `Task moved to ${nextStatus.name}.`
+                      : undefined,
+                  );
+                }}
               >
                 <option value="">Select status</option>
                 {statuses.map((status) => (
@@ -257,7 +303,10 @@ export function TaskDrawer({
               <MultiSelect
                 value={draft.assigneeIds}
                 onChange={(assigneeIds) => save({ ...draft, assigneeIds })}
-                options={users.map((user) => ({ value: user.id, label: user.name }))}
+                options={users.map((user) => ({
+                  value: user.id,
+                  label: user.name,
+                }))}
                 aria-label="Assignees"
                 placeholder="Unassigned"
               />
@@ -266,13 +315,15 @@ export function TaskDrawer({
               </span>
             </FormField>
           </div>
-          {canDelete && <button
-            type="button"
-            onClick={() => setIsDeleteConfirmOpen(true)}
-            className="w-full cursor-pointer rounded-xl border border-[#ffd9dd] px-4 py-2.5 text-sm font-semibold text-[#d94d5d] transition hover:bg-[#fff4f5]"
-          >
-            Delete task
-          </button>}
+          {canDelete && (
+            <button
+              type="button"
+              onClick={() => setIsDeleteConfirmOpen(true)}
+              className="w-full cursor-pointer rounded-xl border border-[#ffd9dd] px-4 py-2.5 text-sm font-semibold text-[#d94d5d] transition hover:bg-[#fff4f5]"
+            >
+              Delete task
+            </button>
+          )}
         </div>
       </aside>
       {isDeleteConfirmOpen && (

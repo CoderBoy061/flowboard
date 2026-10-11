@@ -119,13 +119,13 @@ export function useFlowboardController() {
   const selectedList = requestedList ?? accessibleLists[0];
   const selectedListWasDenied = Boolean(
     !requestedList &&
-      workspace.containers.some(
-        (container) =>
-          container.id === preferences.selectedListId &&
-          !container.isArchived &&
-          (container.workspaceId ?? "workspace-1") ===
-            workspace.currentWorkspaceId,
-      ),
+    workspace.containers.some(
+      (container) =>
+        container.id === preferences.selectedListId &&
+        !container.isArchived &&
+        (container.workspaceId ?? "workspace-1") ===
+          workspace.currentWorkspaceId,
+    ),
   );
   const tasks = useSelector((state: RootState) =>
     selectedList ? selectTasksForList(state, selectedList.id) : emptyTasks,
@@ -146,13 +146,21 @@ export function useFlowboardController() {
       (container.workspaceId ?? "workspace-1") === workspace.currentWorkspaceId,
   );
   const archivedTasks = workspace.tasks.filter((task) => {
-    const list = workspace.containers.find((container) => container.id === task.listId);
-    return task.isArchived && (list?.workspaceId ?? "workspace-1") === workspace.currentWorkspaceId;
+    const list = workspace.containers.find(
+      (container) => container.id === task.listId,
+    );
+    return (
+      task.isArchived &&
+      (list?.workspaceId ?? "workspace-1") === workspace.currentWorkspaceId
+    );
   });
   const userNotifications = useMemo(
     () =>
       (workspace.notifications ?? [])
-        .filter((notification) => notification.recipientUserId === workspace.currentUserId)
+        .filter(
+          (notification) =>
+            notification.recipientUserId === workspace.currentUserId,
+        )
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
     [workspace.currentUserId, workspace.notifications],
   );
@@ -198,13 +206,17 @@ export function useFlowboardController() {
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, [selectedTaskId]);
 
+  const showToast = useCallback((message: string) => {
+    setToast(message);
+    window.setTimeout(() => setToast(null), 3500);
+  }, []);
+
   const notifyError = (error: unknown) => {
     const storeError = error as { error?: { message?: string } };
-    setToast(
+    showToast(
       storeError.error?.message ??
         (error instanceof Error ? error.message : "Something went wrong."),
     );
-    window.setTimeout(() => setToast(null), 3500);
   };
 
   const handleCreate = (input: CreateTaskInput) => {
@@ -229,6 +241,7 @@ export function useFlowboardController() {
     try {
       dispatch(addTask(task));
       setIsCreateOpen(false);
+      showToast("Task created.");
     } catch (error) {
       notifyError(error);
     }
@@ -249,7 +262,8 @@ export function useFlowboardController() {
       assigneeIds: [...parent.assigneeIds],
       dueDate: parent.dueDate,
       position: workspace.tasks.filter(
-        (task) => task.listId === parent.listId && task.parentTaskId === parent.id,
+        (task) =>
+          task.listId === parent.listId && task.parentTaskId === parent.id,
       ).length,
       createdAt: now,
       updatedAt: now,
@@ -321,9 +335,16 @@ export function useFlowboardController() {
     try {
       const scaffold = createWorkspaceScaffold(`workspace-${Date.now()}`, name);
       dispatch(addWorkspace(scaffold.workspace));
-      scaffold.containers.forEach((container) => dispatch(addContainer(container)));
-      dispatch(addStatuses({ listId: scaffold.listId, statuses: scaffold.statuses }));
-      setPreferences((current) => ({ ...current, selectedListId: scaffold.listId }));
+      scaffold.containers.forEach((container) =>
+        dispatch(addContainer(container)),
+      );
+      dispatch(
+        addStatuses({ listId: scaffold.listId, statuses: scaffold.statuses }),
+      );
+      setPreferences((current) => ({
+        ...current,
+        selectedListId: scaffold.listId,
+      }));
       setIsWorkspaceModalOpen(false);
     } catch (error) {
       notifyError(error);
@@ -371,7 +392,9 @@ export function useFlowboardController() {
         ),
       );
       if (createTarget.type === "list")
-        dispatch(addStatuses({ listId: id, statuses: createDefaultStatuses(id) }));
+        dispatch(
+          addStatuses({ listId: id, statuses: createDefaultStatuses(id) }),
+        );
       setCreateTarget(null);
     } catch (error) {
       notifyError(error);
@@ -409,7 +432,9 @@ export function useFlowboardController() {
       const user = workspace.users.find((item) => item.id === userId);
       if (!user) return;
       dispatch(switchUser(userId));
-      setToast(`Switched to ${user.name} — ${user.role === "admin" ? "Admin" : "Member"}`);
+      setToast(
+        `Switched to ${user.name} — ${user.role === "admin" ? "Admin" : "Member"}`,
+      );
       window.setTimeout(() => setToast(null), 3500);
     },
     [dispatch, workspace.users],
@@ -423,7 +448,10 @@ export function useFlowboardController() {
     () => setIsNotificationsOpen((value) => !value),
     [],
   );
-  const closeNotifications = useCallback(() => setIsNotificationsOpen(false), []);
+  const closeNotifications = useCallback(
+    () => setIsNotificationsOpen(false),
+    [],
+  );
   const markAllNotificationsRead = useCallback(() => {
     // Marks only the active user's notifications as read.
     dispatch(markNotificationsRead(workspace.currentUserId));
@@ -440,7 +468,11 @@ export function useFlowboardController() {
     (id: string) => {
       const current = workspace.workspaces.find((item) => item.id === id);
       if (current)
-        setRenameTarget({ type: "workspace", id: current.id, name: current.name });
+        setRenameTarget({
+          type: "workspace",
+          id: current.id,
+          name: current.name,
+        });
     },
     [workspace.workspaces],
   );
@@ -466,7 +498,11 @@ export function useFlowboardController() {
     (id: string) => {
       const container = workspace.containers.find((item) => item.id === id);
       if (container)
-        setRenameTarget({ type: "container", id: container.id, name: container.name });
+        setRenameTarget({
+          type: "container",
+          id: container.id,
+          name: container.name,
+        });
     },
     [workspace.containers],
   );
@@ -480,7 +516,9 @@ export function useFlowboardController() {
       const container = workspace.containers.find((item) => item.id === id);
       if (
         container &&
-        window.confirm(`Delete ${container.type} "${container.name}" and its children?`)
+        window.confirm(
+          `Delete ${container.type} "${container.name}" and its children?`,
+        )
       ) {
         try {
           dispatch(archiveContainer(id));
@@ -563,5 +601,6 @@ export function useFlowboardController() {
     deleteContainerFromSidebar,
     reorderContainerSiblings,
     notifyError,
+    showToast,
   };
 }

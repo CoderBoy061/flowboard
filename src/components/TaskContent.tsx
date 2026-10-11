@@ -14,6 +14,7 @@ export function TaskContent({
   onError,
   onCreateTask,
   onBulkUpdate,
+  onToast,
 }: {
   loading: boolean;
   selectedList?: Container;
@@ -28,6 +29,7 @@ export function TaskContent({
     taskIds: string[],
     changes: Partial<Pick<Task, "priority" | "assigneeIds">>,
   ) => void;
+  onToast?: (message: string) => void;
 }) {
   if (loading) return <BoardLoadingSkeleton />;
 
@@ -49,6 +51,7 @@ export function TaskContent({
         onOpenTask={onOpenTask}
         onError={onError}
         onCreateTask={onCreateTask}
+        onToast={onToast}
       />
     );
   }
@@ -59,7 +62,7 @@ export function TaskContent({
       statuses={statuses}
       users={users}
       onOpenTask={onOpenTask}
-        onBulkUpdate={onBulkUpdate}
+      onBulkUpdate={onBulkUpdate}
     />
   );
 }
